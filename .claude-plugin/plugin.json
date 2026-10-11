@@ -1,0 +1,19 @@
+{
+  "name": "ec2build",
+  "version": "1.3.0",
+  "description": "EC2Build: turn an app idea into six consistent, versioned build specs (PRD, TRD, horizontal-swimlane App Flow, Design Brief, Database Schema, prompt-by-prompt Implementation Plan) for coding agents.",
+  "author": {
+    "name": "rakethost"
+  },
+  "keywords": [
+    "sdlc",
+    "prd",
+    "specification",
+    "swimlane",
+    "planning",
+    "agentic"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/raketbizdev/ec2build",
+  "repository": "https://github.com/raketbizdev/ec2build"
+}

@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3180" height="978" viewBox="0 0 3180 978" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="FLOW-012 — Payout request &amp; PayPal swimlane">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker></defs>
+<rect width="3180" height="978" fill="#FFFFFF"/>
+<text x="16" y="34" font-size="20" font-weight="700" fill="#0F172A">FLOW-012 — Payout request &amp; PayPal</text>
+<text x="16" y="56" font-size="12" fill="#475569">Rows = who acts. Read left to right. Solid arrow = next step · dashed arrow = go back / retry · green = start/end · amber = decision · red = error.</text>
+<rect x="0" y="70" width="3180" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="70" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="128.0" font-size="14" font-weight="700" fill="#0F172A">Tester</text>
+<rect x="0" y="194" width="3180" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="194" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="252.0" font-size="14" font-weight="700" fill="#0F172A">Web UI</text>
+<rect x="0" y="318" width="3180" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="318" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="376.0" font-size="14" font-weight="700" fill="#0F172A">API</text>
+<rect x="0" y="442" width="3180" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="442" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="500.0" font-size="14" font-weight="700" fill="#0F172A">Database</text>
+<rect x="0" y="566" width="3180" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="566" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="624.0" font-size="14" font-weight="700" fill="#0F172A">Admin</text>
+<rect x="0" y="690" width="3180" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="690" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="748.0" font-size="14" font-weight="700" fill="#0F172A">PayPal</text>
+<rect x="0" y="814" width="3180" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="814" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="872.0" font-size="14" font-weight="700" fill="#0F172A">Notifications</text>
+<path d="M328,132 L350,132 L350,380 L367,380" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M533,380 L550,380 L550,256 L572,256" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M533,380 L550,380 L550,504 L572,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M728,504 L750,504 L750,876 L772,876" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M928,876 L950,876 L950,628 L972,628" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1128,628 L1167,628" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1333,628 L1350,628 L1350,504 L1372,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1528,504 L1550,504 L1550,876 L1572,876" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1333,628 L1358,628 L1358,380 L1372,380" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1528,380 L1558,380 L1558,752 L1567,752" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1733,752 L1750,752 L1750,628 L1772,628" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1850,661 L1850,681 L1250,681 L1250,672" fill="none" stroke="#334155" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+<path d="M1733,752 L1758,752 L1758,504 L1772,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1928,504 L1950,504 L1950,752 L1972,752" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2128,752 L2150,752 L2150,380 L2167,380" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2333,380 L2372,380" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2333,380 L2350,380 L2350,504 L2367,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2533,504 L2572,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2728,504 L2750,504 L2750,876 L2772,876" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2533,504 L2550,504 L2550,451 L2750,451 L2750,504 L2772,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M2928,504 L2950,504 L2950,876 L2972,876" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="172.0" y="99.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="250.0" y="129" font-size="12" text-anchor="middle" fill="#0F172A">Open wallet, enter</text>
+<text x="250.0" y="143" font-size="12" text-anchor="middle" fill="#0F172A">amount</text>
+<circle cx="174.0" cy="97.0" r="10" fill="#15803D"/><text x="174.0" y="101.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+<polygon points="450.0,336.0 533.0,380.0 450.0,424.0 367.0,380.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="450.0" y="370" font-size="12" text-anchor="middle" fill="#0F172A">≥ US$25, PayPal</text>
+<text x="450.0" y="384" font-size="12" text-anchor="middle" fill="#0F172A">set, no hold, none</text>
+<text x="450.0" y="398" font-size="12" text-anchor="middle" fill="#0F172A">open?</text>
+<circle cx="369.0" cy="334.0" r="10" fill="#B45309"/><text x="369.0" y="338.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+<rect x="572.0" y="223.0" width="156" height="66" rx="8" fill="#FEE2E2" stroke="#B91C1C" stroke-width="2"/>
+<text x="650.0" y="253" font-size="12" text-anchor="middle" fill="#0F172A">Show reason (e.g. US$3</text>
+<text x="650.0" y="267" font-size="12" text-anchor="middle" fill="#0F172A">more needed)</text>
+<circle cx="574.0" cy="221.0" r="10" fill="#B91C1C"/><text x="574.0" y="225.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+<rect x="572.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="650.0" y="501" font-size="12" text-anchor="middle" fill="#0F172A">Payout requested;</text>
+<text x="650.0" y="515" font-size="12" text-anchor="middle" fill="#0F172A">balance held</text>
+<circle cx="574.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="574.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+<rect x="772.0" y="843.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="850.0" y="873" font-size="12" text-anchor="middle" fill="#0F172A">Tester: request</text>
+<text x="850.0" y="887" font-size="12" text-anchor="middle" fill="#0F172A">received</text>
+<circle cx="774.0" cy="841.0" r="10" fill="#1D4ED8"/><text x="774.0" y="845.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+<rect x="972.0" y="595.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="1050.0" y="625" font-size="12" text-anchor="middle" fill="#0F172A">Review queue + fraud</text>
+<text x="1050.0" y="639" font-size="12" text-anchor="middle" fill="#0F172A">signals</text>
+<circle cx="974.0" cy="593.0" r="10" fill="#1D4ED8"/><text x="974.0" y="597.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">6</text>
+<polygon points="1250.0,584.0 1333.0,628.0 1250.0,672.0 1167.0,628.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="1250.0" y="632" font-size="12" text-anchor="middle" fill="#0F172A">Approve?</text>
+<circle cx="1169.0" cy="582.0" r="10" fill="#B45309"/><text x="1169.0" y="586.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">7</text>
+<rect x="1372.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="1450.0" y="501" font-size="12" text-anchor="middle" fill="#0F172A">Rejected; balance</text>
+<text x="1450.0" y="515" font-size="12" text-anchor="middle" fill="#0F172A">released</text>
+<circle cx="1374.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="1374.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">8</text>
+<rect x="1372.0" y="347.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="1450.0" y="384" font-size="12" text-anchor="middle" fill="#0F172A">Send PayPal batch</text>
+<circle cx="1374.0" cy="345.0" r="10" fill="#1D4ED8"/><text x="1374.0" y="349.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">9</text>
+<rect x="1572.0" y="843.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="1650.0" y="880" font-size="12" text-anchor="middle" fill="#0F172A">Tester: rejected</text>
+<circle cx="1574.0" cy="841.0" r="10" fill="#15803D"/><text x="1574.0" y="845.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">10</text>
+<polygon points="1650.0,708.0 1733.0,752.0 1650.0,796.0 1567.0,752.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="1650.0" y="756" font-size="12" text-anchor="middle" fill="#0F172A">Batch accepted?</text>
+<circle cx="1569.0" cy="706.0" r="10" fill="#B45309"/><text x="1569.0" y="710.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">11</text>
+<rect x="1772.0" y="595.0" width="156" height="66" rx="8" fill="#FEE2E2" stroke="#B91C1C" stroke-width="2"/>
+<text x="1850.0" y="632" font-size="12" text-anchor="middle" fill="#0F172A">Stays requested; retry</text>
+<circle cx="1774.0" cy="593.0" r="10" fill="#B91C1C"/><text x="1774.0" y="597.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">12</text>
+<rect x="1772.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="1850.0" y="508" font-size="12" text-anchor="middle" fill="#0F172A">Processing</text>
+<circle cx="1774.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="1774.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">13</text>
+<rect x="1972.0" y="719.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="2050.0" y="756" font-size="12" text-anchor="middle" fill="#0F172A">Result webhook per item</text>
+<circle cx="1974.0" cy="717.0" r="10" fill="#1D4ED8"/><text x="1974.0" y="721.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">14</text>
+<polygon points="2250.0,336.0 2333.0,380.0 2250.0,424.0 2167.0,380.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="2250.0" y="384" font-size="12" text-anchor="middle" fill="#0F172A">Signature valid?</text>
+<circle cx="2169.0" cy="334.0" r="10" fill="#B45309"/><text x="2169.0" y="338.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">15</text>
+<rect x="2372.0" y="347.0" width="156" height="66" rx="8" fill="#FEE2E2" stroke="#B91C1C" stroke-width="2"/>
+<text x="2450.0" y="384" font-size="12" text-anchor="middle" fill="#0F172A">Reject 400</text>
+<circle cx="2374.0" cy="345.0" r="10" fill="#B91C1C"/><text x="2374.0" y="349.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">16</text>
+<polygon points="2450.0,460.0 2533.0,504.0 2450.0,548.0 2367.0,504.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="2450.0" y="508" font-size="12" text-anchor="middle" fill="#0F172A">Result?</text>
+<circle cx="2369.0" cy="458.0" r="10" fill="#B45309"/><text x="2369.0" y="462.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">17</text>
+<rect x="2572.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="2650.0" y="508" font-size="12" text-anchor="middle" fill="#0F172A">Paid</text>
+<circle cx="2574.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="2574.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">18</text>
+<rect x="2772.0" y="843.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="2850.0" y="880" font-size="12" text-anchor="middle" fill="#0F172A">Tester: paid</text>
+<circle cx="2774.0" cy="841.0" r="10" fill="#15803D"/><text x="2774.0" y="845.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">19</text>
+<rect x="2772.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="2850.0" y="501" font-size="12" text-anchor="middle" fill="#0F172A">Failed / returned;</text>
+<text x="2850.0" y="515" font-size="12" text-anchor="middle" fill="#0F172A">balance released</text>
+<circle cx="2774.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="2774.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">20</text>
+<rect x="2972.0" y="843.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="3050.0" y="873" font-size="12" text-anchor="middle" fill="#0F172A">Tester: fix PayPal</text>
+<text x="3050.0" y="887" font-size="12" text-anchor="middle" fill="#0F172A">email</text>
+<circle cx="2974.0" cy="841.0" r="10" fill="#15803D"/><text x="2974.0" y="845.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">21</text>
+<rect x="320" y="247" width="59" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="350" y="260" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">request</text>
+<rect x="538" y="309" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="550" y="322" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+<rect x="534" y="433" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="550" y="446" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="1338" y="557" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1350" y="570" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+<rect x="1342" y="495" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1358" y="508" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="1738" y="681" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1750" y="694" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+<rect x="1528" y="672" width="45" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1550" y="685" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">retry</text>
+<rect x="1742" y="619" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1758" y="632" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="2340" y="371" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="2352" y="384" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+<rect x="2334" y="433" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="2350" y="446" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="2516" y="495" width="73" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="2552" y="508" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">succeeded</text>
+<rect x="2624" y="442" width="52" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="2650" y="455" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">failed</text>
+</svg>

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1580" height="854" viewBox="0 0 1580 854" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="FLOW-013 — Cancellation &amp; recruiting expiry swimlane">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker></defs>
+<rect width="1580" height="854" fill="#FFFFFF"/>
+<text x="16" y="34" font-size="20" font-weight="700" fill="#0F172A">FLOW-013 — Cancellation &amp; recruiting expiry</text>
+<text x="16" y="56" font-size="12" fill="#475569">Rows = who acts. Read left to right. Solid arrow = next step · dashed arrow = go back / retry · green = start/end · amber = decision · red = error.</text>
+<rect x="0" y="70" width="1580" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="70" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="128.0" font-size="14" font-weight="700" fill="#0F172A">Developer</text>
+<rect x="0" y="194" width="1580" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="194" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="252.0" font-size="14" font-weight="700" fill="#0F172A">Cron jobs</text>
+<rect x="0" y="318" width="1580" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="318" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="376.0" font-size="14" font-weight="700" fill="#0F172A">API</text>
+<rect x="0" y="442" width="1580" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="442" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="500.0" font-size="14" font-weight="700" fill="#0F172A">Database</text>
+<rect x="0" y="566" width="1580" height="124" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="0" y="566" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="624.0" font-size="14" font-weight="700" fill="#0F172A">Stripe</text>
+<rect x="0" y="690" width="1580" height="124" fill="#EEF2F7" stroke="#CBD5E1"/>
+<rect x="0" y="690" width="150" height="124" fill="#E2E8F0" stroke="#CBD5E1"/>
+<text x="14" y="748.0" font-size="14" font-weight="700" fill="#0F172A">Notifications</text>
+<path d="M328,132 L350,132 L350,380 L372,380" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M528,380 L550,380 L550,504 L567,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M328,256 L558,256 L558,504 L567,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M733,504 L750,504 L750,132 L772,132" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M733,504 L772,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M928,504 L967,504" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1133,504 L1150,504 L1150,628 L1172,628" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1133,504 L1350,504 L1350,752 L1372,752" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M1328,628 L1358,628 L1358,752 L1372,752" fill="none" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="172.0" y="99.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="250.0" y="136" font-size="12" text-anchor="middle" fill="#0F172A">Click Cancel + reason</text>
+<circle cx="174.0" cy="97.0" r="10" fill="#15803D"/><text x="174.0" y="101.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+<rect x="172.0" y="223.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="250.0" y="253" font-size="12" text-anchor="middle" fill="#0F172A">Recruiting deadline</text>
+<text x="250.0" y="267" font-size="12" text-anchor="middle" fill="#0F172A">passed</text>
+<circle cx="174.0" cy="221.0" r="10" fill="#15803D"/><text x="174.0" y="225.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+<rect x="372.0" y="347.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="450.0" y="384" font-size="12" text-anchor="middle" fill="#0F172A">Cancel request</text>
+<circle cx="374.0" cy="345.0" r="10" fill="#1D4ED8"/><text x="374.0" y="349.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+<polygon points="650.0,460.0 733.0,504.0 650.0,548.0 567.0,504.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="650.0" y="501" font-size="12" text-anchor="middle" fill="#0F172A">Status allows</text>
+<text x="650.0" y="515" font-size="12" text-anchor="middle" fill="#0F172A">cancel?</text>
+<circle cx="569.0" cy="458.0" r="10" fill="#B45309"/><text x="569.0" y="462.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+<rect x="772.0" y="99.0" width="156" height="66" rx="8" fill="#FEE2E2" stroke="#B91C1C" stroke-width="2"/>
+<text x="850.0" y="129" font-size="12" text-anchor="middle" fill="#0F172A">409: testing started,</text>
+<text x="850.0" y="143" font-size="12" text-anchor="middle" fill="#0F172A">contact admin</text>
+<circle cx="774.0" cy="97.0" r="10" fill="#B91C1C"/><text x="774.0" y="101.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+<rect x="772.0" y="471.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="850.0" y="501" font-size="12" text-anchor="middle" fill="#0F172A">Cancelled; testers</text>
+<text x="850.0" y="515" font-size="12" text-anchor="middle" fill="#0F172A">released</text>
+<circle cx="774.0" cy="469.0" r="10" fill="#1D4ED8"/><text x="774.0" y="473.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">6</text>
+<polygon points="1050.0,460.0 1133.0,504.0 1050.0,548.0 967.0,504.0" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+<text x="1050.0" y="508" font-size="12" text-anchor="middle" fill="#0F172A">Was it paid?</text>
+<circle cx="969.0" cy="458.0" r="10" fill="#B45309"/><text x="969.0" y="462.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">7</text>
+<rect x="1172.0" y="595.0" width="156" height="66" rx="8" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="1250.0" y="632" font-size="12" text-anchor="middle" fill="#0F172A">Full refund</text>
+<circle cx="1174.0" cy="593.0" r="10" fill="#1D4ED8"/><text x="1174.0" y="597.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">8</text>
+<rect x="1372.0" y="719.0" width="156" height="66" rx="33.0" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+<text x="1450.0" y="749" font-size="12" text-anchor="middle" fill="#0F172A">Developer + testers</text>
+<text x="1450.0" y="763" font-size="12" text-anchor="middle" fill="#0F172A">told</text>
+<circle cx="1374.0" cy="717.0" r="10" fill="#15803D"/><text x="1374.0" y="721.0" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">9</text>
+<rect x="542" y="371" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="558" y="384" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">job</text>
+<rect x="738" y="309" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="750" y="322" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+<rect x="737" y="495" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="752" y="508" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="1134" y="557" width="31" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1150" y="570" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">yes</text>
+<rect x="1338" y="619" width="24" height="17" rx="4" fill="#FFFFFF" stroke="#94A3B8"/><text x="1350" y="632" font-size="11" font-weight="600" text-anchor="middle" fill="#334155">no</text>
+</svg>
