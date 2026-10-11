@@ -523,3 +523,4 @@ Package = the six documents. Each document's own version is in its document cont
 | 0.4.0 | 2026-10-11 | App flows redrawn as horizontal swimlanes (rows = users/systems, left-to-right) | APP_FLOW |
 | 0.5.0 | 2026-10-11 | Accounts setup (AUTO / ASSISTED / OWNER-ONLY), shared responsibility, PROMPT 00 | IMPLEMENTATION_PLAN |
 | 0.6.0 | 2026-10-11 | Simplified to six documents: context, assumptions, open decisions and history moved into PRD §16–§19; setup, shared responsibility and traceability moved into IMPLEMENTATION_PLAN §2A, §2B, Appendix A; validation report, manifest and project README removed | PRD, TRD, APP_FLOW, IMPLEMENTATION_PLAN |
+| 0.6.1 | 2026-10-11 | Added the one-page HTML view `docs/testko-ph.html` (generated; no document content changed) | — |

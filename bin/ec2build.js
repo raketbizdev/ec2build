@@ -23,6 +23,7 @@ Commands
   doctor <project>   Check accounts/tools/env for a stage   (--stage local|staging|production, --app <dir>)
   validate <project> Check a generated project package
   swimlanes <project>  Re-render App Flow swimlane diagrams
+  html <project>     Build the one-page HTML of all six documents (docs/<slug>.html)
   help               Show this help
 
 Install options
@@ -123,6 +124,7 @@ function main() {
     case 'uninstall': case 'remove': return uninstall(parse(rest));
     case 'status': return status(parse(rest));
     case 'doctor': case 'validate': case 'swimlanes': return runTool(cmd, rest);
+    case 'html': return runTool('onepage', rest);
     case 'version': return console.log(VERSION);
     case 'help': return console.log(HELP);
     default: console.error(`Unknown command: ${cmd}\n`); console.log(HELP); process.exit(2);

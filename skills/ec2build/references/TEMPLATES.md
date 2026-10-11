@@ -18,6 +18,9 @@ ERD Mermaid; tables with exact columns/types/nullability/defaults/PK/FK; constra
 ## IMPLEMENTATION_PLAN.md
 Written as a sequence of self-contained copy/paste prompts (one per TASK, run in order until complete, then a completion audit). Milestone and dependency DAG; ordered phases 0..N; one fully specified coding-agent instruction per task; referenced FR/TRD/flow/design/schema IDs; repository paths; commands and prerequisites; code & docs outputs; tests and security verification; pass/fail criteria; checkpoints, rollback and release gates; progress checklist; no invented completion statuses.
 
+## One-page HTML
+`docs/<slug>.html` is generated from the six documents by `scripts/onepage.py` (never written by hand): header with project name and package version, a card per document with version and status, sidebar navigation with section filter, every document in order, swimlane SVGs inlined, Mermaid diagrams rendered, light/dark and print styles.
+
 ## Supporting content (inside the six documents — no extra files)
 - **PRD** ends with: Brief, discovery & context · Confirmed decisions & assumptions (C-###, A-###) · Open decisions (OD-###, blocks, owner) + override log · Change history (package version table).
 - **IMPLEMENTATION_PLAN** includes: §2A Accounts setup: per third-party service purpose, cost note, stages (local/staging/production), steps labelled AUTO / ASSISTED / OWNER-ONLY with exact URLs and commands, env variable names (never values), verification; steps are rendered between `<!-- setup:begin -->`/`<!-- setup:end -->` from a ```json block (format ec2build-setup/1). §2B Shared responsibility matrix (owner / EC2Build / coding agent / providers, see references/SETUP_AND_RESPONSIBILITY.md §6). Appendix A Traceability matrix (FR/NFR → flow → UI → API → DB → task → test).
