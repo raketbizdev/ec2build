@@ -13,7 +13,7 @@ const VERSION = require(path.join(PKG_ROOT, 'package.json')).version;
 
 const HELP = `EC2Build ${VERSION} — free agent skill that turns an app idea into build-ready specs.
 
-Usage: npx ec2build <command> [options]
+Usage: npx github:raketbizdev/ec2build <command> [options]
 
 Commands
   install            Install for Claude Code and Codex (default: both)

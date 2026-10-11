@@ -7,24 +7,27 @@ An installable agent skill for Claude Code and OpenAI Codex. It turns an app ide
 Requires: Claude Code and/or Codex, and Python 3 (for the bundled tools; no extra packages).
 
 ## Install (one command, any OS)
-Needs Node.js 18+ (for `npx`). Python 3 is needed for the bundled diagram/doctor/validate tools.
+Needs Node.js 18+ (for `npx`) and Git. Python 3 is needed for the bundled diagram/doctor/validate/HTML tools.
 ```text
-npx ec2build install            # Claude Code + Codex, for your user (works in every folder)
-npx ec2build install --claude   # Claude Code only
-npx ec2build install --codex    # Codex only
-npx ec2build install --project ./my-app   # only inside one project
-npx ec2build update             # get the latest version
-npx ec2build status             # where it is installed, which version
-npx ec2build uninstall
+npx github:raketbizdev/ec2build install            # Claude Code + Codex, for your user (works in every folder)
+npx github:raketbizdev/ec2build install --claude   # Claude Code only
+npx github:raketbizdev/ec2build install --codex    # Codex only
+npx github:raketbizdev/ec2build install --project ./my-app   # only inside one project
+npx github:raketbizdev/ec2build update             # get the latest version
+npx github:raketbizdev/ec2build status             # where it is installed, which version
+npx github:raketbizdev/ec2build uninstall
 ```
 Works the same on Windows, macOS and Linux (PowerShell, cmd, Terminal, VS Code terminal). No shell scripts.
+After installing, start a **new** Claude Code chat (VS Code or terminal) and type `/ec2build help`.
+
+> EC2Build is not published on npm yet, so the short form `npx ec2build …` returns **404 Not Found**. Use `npx github:raketbizdev/ec2build …` as shown above.
 
 **Other ways**
 - **Claude Code plugin** (no terminal): in Claude Code chat run `/plugin marketplace add raketbizdev/ec2build`, then `/plugin install ec2build@ec2build`. The command becomes `/ec2build:ec2build`.
-- **Before the npm package is published:** `npx github:raketbizdev/ec2build install`, or from a local copy: `npx /path/to/ec2build install`.
-- **Manual:** copy `skills/ec2build` to `~/.claude/skills/ec2build` (Windows: `%USERPROFILE%\.claude\skills\ec2build`).
+- **From a local copy** (e.g., after `git clone`): `npx --package ./ec2build ec2build install`
+- **Manual:** download the ZIP from GitHub and copy `skills/ec2build` to `~/.claude/skills/ec2build` (Windows: `%USERPROFILE%\.claude\skills\ec2build`).
 
-The CLI also runs the tools: `npx ec2build html <project>` (one-page view), `npx ec2build doctor <project> --stage local`, `npx ec2build validate <project>`, `npx ec2build swimlanes <project>`.
+The CLI also runs the tools (project folder defaults to the current folder): `npx github:raketbizdev/ec2build html` (one-page view), `… doctor --stage local`, `… validate`, `… swimlanes`.
 
 ## Use
 Open Claude Code or Codex in any folder:
@@ -85,7 +88,7 @@ package.json                npm package (name: ec2build)
 ```
 
 ## Developing EC2Build
-Edit only `skills/ec2build/`. Then bump `version` in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, add a `CHANGELOG.md` entry, bump `version` in `package.json`, then `npm publish` (owner) and `npx ec2build update` (or `/reload-plugins`). Check the plugin with `claude plugin validate .`.
+Edit only `skills/ec2build/`. Then bump `version` in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, add a `CHANGELOG.md` entry, bump `version` in `package.json`, then commit and push; users update with `npx github:raketbizdev/ec2build update` (or `/reload-plugins` for the plugin). If the package is later published to npm (`npm login` + `npm publish`, owner only), the short form `npx ec2build …` will also work. Check the plugin with `claude plugin validate .`.
 
 ## Notes
 Documentation reduces rework, but delivery time depends on scope and risk. EC2Build does not deploy anything by itself; sensitive actions need your explicit approval.
