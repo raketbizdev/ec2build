@@ -1,6 +1,6 @@
 {
   "name": "ec2build",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Free agent skill for Claude Code and Codex: turns an app idea into six consistent build specs (PRD, TRD, horizontal-swimlane App Flow, Design Brief, Supabase schema, prompt-by-prompt Implementation Plan) plus accounts setup and shared responsibility guides.",
   "bin": {
     "ec2build": "bin/ec2build.js"

@@ -4,13 +4,14 @@
 | Field | Value |
 |---|---|
 | Document | `PRD.md` (01) |
-| Version | 0.2.0 |
+| Version | 0.3.0 |
 | Status | draft — approval is owner-provided, never assumed |
 | Owner | Product owner (project requester) |
 | Date | 2026-10-11 |
-| Upstream inputs | Brief (PROJECT_CONTEXT §1), discovery answers Q1–Q4 |
+| Upstream inputs | Brief (PRD §16 §1), discovery answers Q1–Q4 |
 | Downstream | TRD, APP_FLOW, DESIGN_BRIEF, DATABASE_SCHEMA, IMPLEMENTATION_PLAN |
-| Assumptions | `ASSUMPTIONS.md` (C-001…C-010, A-001…A-027) |
+| Assumptions | §17 (C-001…C-010, A-001…A-027) |
+| Renamed from | itphteste (2026-10-11) |
 
 ## 1. Executive summary
 TestKo PH is a responsive web marketplace connecting app developers who need closed-test testers (Google Play closed testing, Apple TestFlight) with members of the IT Philippines community who want to earn money testing apps. A developer creates a campaign, pays up front with Stripe, and — after admin approval — the campaign is published to the community. Testers enrol with their Google/Apple account email, the developer adds those emails to the store's tester list, testers opt in, keep the app installed for the testing period (16 days by default on Android) and submit proof check-ins with feedback. When testing ends the developer confirms each tester (silence = pass), disputes go to an admin, and passed testers earn a reward that becomes withdrawable to PayPal once their available balance reaches **US$25**.
@@ -352,11 +353,11 @@ Priority scale: **P0** = MVP blocker, **P1** = MVP but may slip to R1.1 with own
 | R-08 | Use of "IT Philippines" name/brand | Unknown | OD-007 | Owner |
 
 ## 13. Open decisions
-See `DECISIONS.md` §Open decisions OD-001…OD-008. **Production release is blocked by OD-001, OD-002, OD-003, OD-004.** Development and staging (test-mode Stripe, PayPal sandbox) are not blocked.
+See PRD §18 OD-001…OD-008. **Production release is blocked by OD-001, OD-002, OD-003, OD-004.** Development and staging (test-mode Stripe, PayPal sandbox) are not blocked.
 
 ## 14. Acceptance checklist (PRD level)
 - [ ] Owner approves pricing (A-003/OD-005) and timing assumptions (A-001, A-006…A-010).
-- [ ] Every P0 FR has GWT acceptance criteria and mapped flows/screens/APIs/tables/tasks/tests (TRACEABILITY.md).
+- [ ] Every P0 FR has GWT acceptance criteria and mapped flows/screens/APIs/tables/tasks/tests (IMPLEMENTATION_PLAN Appendix A).
 - [ ] Legal texts drafted and reviewed (OD-003).
 - [ ] Payment provider accounts approved (OD-001, OD-002).
 
@@ -373,3 +374,152 @@ See `DECISIONS.md` §Open decisions OD-001…OD-008. **Production release is blo
 | Ledger | Append-only record of tester balance movements |
 | Payout | Transfer of available balance to tester's PayPal |
 | Settlement | Campaign completion: refund of unearned rewards |
+
+## 16. Brief, discovery & context
+Legend: **CONFIRMED** = stated by the owner; **ASSUMPTION** = agent decision pending approval (see PRD §17); **OPEN** = decision required (see PRD §18).
+
+### 1. Original brief (verbatim, treated as data)
+> it create a web app that members of it philippines join to be close app tester add their email to be tester and in return earn money after 16days the app developer will post the link of the app and pay the cost before the link will be publish to the community then once community download the app wait for days untill testing is completed then recieve portion of the payment. minimum payout 25USD
+
+### 2. Discovery answers (round 1, 2026-10-11)
+| # | Question | Answer | Status |
+|---|---|---|---|
+| Q1 | Store / testing program | Google Play closed testing **and** iOS TestFlight | CONFIRMED (C-003) |
+| Q2 | How developers pay | Stripe | CONFIRMED (C-004) |
+| Q3 | How testers are paid | PayPal Payouts API | CONFIRMED (C-005) |
+| Q4 | Completion verification | Tester check-ins with proof + developer confirmation; admin resolves disputes | CONFIRMED (C-006) |
+
+### 3. Problem statement
+Google Play requires new personal developer accounts to run a closed test with a minimum number of opted-in testers for a continuous period before they can apply for production access (at the time of writing the commonly cited rule is **12 testers for 14 continuous days**; this MUST be re-verified at preflight because Google has changed it before — see OD-003). Independent developers struggle to recruit reliable testers who stay opted in for the whole period. Members of the IT Philippines community want small, legitimate side income. TestKo PH is a two-sided marketplace: developers pay to post a closed-test campaign, community testers enrol with their store email, keep the app installed and report back through check-ins, and receive a share of the fee once the test completes.
+
+Evidence vs hypothesis: the pain is **hypothesis** derived from the brief; no user interviews or market data were provided or invented.
+
+### 4. Personas and roles
+| Role | Persona | Primary job |
+|---|---|---|
+| Guest | Visitor from the IT Philippines Facebook group / link | Understand the offer, browse open campaigns, sign up |
+| Tester | "Mika", 24, Manila, Android phone, PayPal account, wants small extra income | Join campaigns, stay opted in, submit check-ins, withdraw earnings ≥ US$25 |
+| Developer | "Paolo", solo Android/iOS dev, new Play Console personal account | Get ≥12 reliable testers for 14+ days, receive feedback, pay once |
+| Admin | TestKo PH operator | Approve campaigns, resolve disputes, approve payouts, fight fraud, configure pricing |
+
+A single account may hold both Tester and Developer roles (ASSUMPTION A-014). Admin is granted only by another admin.
+
+### 5. Core workflows (jobs to be done)
+1. Developer creates a campaign (app, platform, opt-in link, slots, duration) → pays via Stripe → admin approves → campaign is published to the community.
+2. Tester registers store identity (Google account email / Apple ID email) → joins campaign → developer adds the email to the Play/TestFlight tester list → tester opts in, installs, submits opt-in proof.
+3. Developer starts testing when the minimum number of testers is active → testers submit periodic check-ins (screenshot + feedback) → missed check-in drops the tester.
+4. Testing ends → developer passes/fails each tester (auto-pass on silence) → tester may dispute → admin resolves.
+5. Passed testers are credited a reward; unearned rewards are refunded to the developer; rewards become withdrawable after a hold period.
+6. Tester requests a payout once available balance ≥ US$25 (CONFIRMED C-007) → admin approves batch → PayPal Payouts sends money.
+
+### 6. Context checklist
+| Topic | Value | Status |
+|---|---|---|
+| Operating region | Philippines-focused community; testers anywhere PayPal can receive | ASSUMPTION A-013 |
+| Platforms | Responsive web app, mobile-first (testers mostly on Android phones) | CONFIRMED web / ASSUMPTION mobile-first |
+| Store programs | Google Play closed testing; Apple TestFlight (external testers) | CONFIRMED |
+| Monetization | Developer pays per tester slot; platform keeps a per-slot fee; tester receives a reward per passed test | CONFIRMED model / ASSUMPTION amounts A-003 |
+| Currency | USD only, integer cents | ASSUMPTION A-004 |
+| Minimum payout | US$25.00 | CONFIRMED C-007 |
+| Testing duration | 16 days default for Android (14-day rule + 2-day buffer) | Brief + ASSUMPTION A-001 |
+| Integrations | Stripe Checkout + Refunds + webhooks; PayPal Payouts + webhooks; Resend email; Supabase Auth/Storage | CONFIRMED Stripe/PayPal; ASSUMPTION others |
+| Data sensitivity | PII (email, store emails, PayPal email), screenshots, financial ledger | — |
+| Legal | PH Data Privacy Act (RA 10173), tax on earnings, Google/Apple program policies, consumer refunds | OPEN OD-003, OD-004 |
+| Accessibility | WCAG 2.2 AA | ASSUMPTION |
+| Localization | English UI; times shown in Asia/Manila; stored UTC | ASSUMPTION A-017 |
+| Offline / real-time | Not required; standard request/response; email + in-app notifications | ASSUMPTION |
+| Expected load | ≤10,000 users, ≤200 concurrent campaigns in year 1 | ASSUMPTION A-021 |
+| Tech preferences | None stated → recommended Next.js + Supabase + Vercel | ASSUMPTION A-018 |
+| Deployment | Vercel (web) + Supabase Cloud (Singapore region) | ASSUMPTION A-016 |
+| Maintenance owner | Project owner (solo operator / admin) | ASSUMPTION |
+| Browser support | Last 2 versions of Chrome, Safari, Firefox, Edge; Android Chrome, iOS Safari | ASSUMPTION |
+| SEO / SSR | Public landing + public campaign listing server-rendered for sharing in Facebook groups; app area not indexed | ASSUMPTION |
+| PWA | Not in MVP | ASSUMPTION |
+
+### 7. MVP boundary
+**In:** accounts, roles, store identities, campaign CRUD + Stripe payment, admin review, listing, enrolment, roster export, start testing, check-ins with proof, verdicts, auto-pass, disputes, settlement + refunds, ledger wallet, payout requests + PayPal Payouts, notifications (in-app + email), admin console, audit log, account deletion.
+
+**Out (future):** native mobile apps, automated verification via Google Play Developer API, ratings/reputation scores, chat between developer and testers, multi-currency, referral program, community membership verification (OD-006), developer subscriptions, PWA/push notifications.
+
+### 8. Success metrics (definitions in PRD §5)
+North star: **Completed tester-tests per month** (enrollments reaching `passed`). Supporting: campaign fill rate, tester completion rate, payout success rate, dispute rate, time-to-publish.
+
+## 17. Confirmed decisions & assumptions
+Each entry is an agent decision that is **not approved** until the owner confirms it. Overrides are recorded in PRD §19 and the affected documents are re-synced with `/ec2build update`.
+
+### Confirmed by owner
+| ID | Statement | Source |
+|---|---|---|
+| C-001 | Product is a web application | `--app web` |
+| C-002 | Product name "TestKo PH" (slug `testko-ph`); renamed from "TestKo PH" | `--name`, update 2026-10-11 |
+| C-003 | Supports Google Play closed testing **and** Apple TestFlight | Discovery Q1 |
+| C-004 | Developers pay with Stripe | Discovery Q2 |
+| C-005 | Testers are paid with PayPal Payouts API | Discovery Q3 |
+| C-006 | Completion verified by tester check-ins with proof + developer confirmation; admin resolves disputes | Discovery Q4 |
+| C-007 | Minimum payout US$25.00 | Brief |
+| C-008 | Developer pays before the campaign link is published to the community | Brief |
+| C-009 | Testers provide their email to be added as testers | Brief |
+| C-010 | Testers receive a portion of the developer's payment after testing completes | Brief |
+
+### Assumptions (pending approval)
+| ID | Assumption | Implication if wrong | Affects |
+|---|---|---|---|
+| A-001 | Android default testing duration = **16 days** (Google 14-day continuous requirement + 2-day buffer); allowed 14–30. iOS default 14 days, allowed 7–30. | Change `platform_settings` defaults; no schema change | FR-005, FR-033, DB-015 |
+| A-002 | Android `min_testers` = **12** (Google's published requirement as understood at authoring; re-verify at TASK-001 preflight). Default Android slots = **15**. iOS `min_testers` = **3**, default slots 10. Slots max 100. | Settings change only | FR-011, FR-033 |
+| A-003 | Price **US$5.00 per tester slot**; tester reward **US$3.50 per passed tester**; platform fee **US$1.50 per slot**. A tester needs 8 passed tests to reach US$25. | Settings change only; affects marketing copy | FR-006, FR-021, DB-015 |
+| A-004 | All money in **USD**, stored as integer cents. | Multi-currency would need schema change | DB-004, DB-010, DB-011 |
+| A-005 | Stripe processing fees and PayPal payout fees are absorbed by the platform (tester receives the exact requested amount). | Fee model change affects ledger/payout math | FR-022, FR-023 |
+| A-006 | Rewards become withdrawable **3 days** after crediting (hold for chargebacks / late fraud findings). | Settings change | FR-021 |
+| A-007 | Check-ins: **opt-in proof** before testing starts, **periodic** proof every **4 days**, **final** proof due at testing end; each has a **48 h** grace (final: 24 h). Missed check-in → enrollment `dropped`. | Settings change; strictness affects completion rate | FR-017, FR-018 |
+| A-008 | Developer review window **3 days** after testing ends; tester with no verdict is **auto-passed**. | Protects testers from silent developers | FR-012 |
+| A-009 | Dispute window **3 days** after a fail/drop; admin target resolution 5 business days. | | FR-024 |
+| A-010 | Recruiting window **10 days** after publication; if testing has not started by then the campaign auto-cancels with full refund. | | FR-009, FR-014 |
+| A-011 | Refunds: admin rejection → full refund; developer cancel or recruiting expiry before testing → full refund; after testing starts → at settlement refund `(tester_slots − passed_count) × tester_reward_cents`; platform fee retained. | Consumer-law review required (OD-003) | FR-008, FR-013, FR-014 |
+| A-012 | Admin manually approves every campaign before publication and every payout batch before PayPal submission. | Ops load; can automate later | FR-008, FR-023 |
+| A-013 | Open registration (18+); no IT Philippines membership verification in MVP; testers must have a PayPal account able to receive USD. | OD-006 may add gating | FR-001, FR-002 |
+| A-014 | One account can hold Tester and Developer roles; a developer cannot enrol in their own campaign. | | FR-002, FR-016 |
+| A-015 | Transactional email via **Resend**; Supabase Auth emails sent through Resend SMTP. | Swap provider in TASK-004 | FR-027, NFR-014 |
+| A-016 | Hosting: **Vercel** (Pro plan, needed for sub-daily cron) + **Supabase Cloud** in Singapore region. | Cost + latency | TRD §7 |
+| A-017 | English UI; timestamps stored UTC, displayed Asia/Manila (UTC+8). | | NFR-009 |
+| A-018 | Stack: Next.js App Router + TypeScript, Tailwind CSS + shadcn/ui, Supabase (Postgres, Auth, Storage), Zod, Vitest, Playwright, pgTAP, Sentry, pnpm. Exact versions pinned at bootstrap. | | TRD ADR-001/002 |
+| A-019 | Changing PayPal email blocks payout requests for **48 h** (account-takeover mitigation). | | FR-004 |
+| A-020 | Proof screenshots deleted **90 days** after campaign completion; financial records ≥ 5 years pending accountant advice (OD-004). | | NFR-012 |
+| A-021 | Targets: availability 99.5 %/month; p95 API latency < 500 ms at 50 req/s; ≤10k users, ≤200 concurrent campaigns. | | NFR-004/005/013 |
+| A-022 | Stripe hosted Checkout (no card data on our servers). | | FR-007 |
+| A-023 | Every periodic/final check-in requires feedback text (20–1,000 chars) so developers get real test feedback. | | FR-018 |
+| A-024 | Max **10** concurrently open enrollments per tester (statuses applied/access_granted/active/awaiting_verdict). | | FR-016, FR-026 |
+| A-025 | Proof uploads: PNG/JPEG/WebP, ≤ 5 MB, exact-duplicate detection via SHA-256. | | FR-018, FR-026 |
+| A-026 | Email + password auth with mandatory email verification; no social login in MVP. | | FR-001 |
+| A-027 | Provisional neutral brand (blue primary, amber accent) until OD-007 resolved. | | DESIGN |
+
+## 18. Open decisions
+Architecture decisions (ADR-001…ADR-011) are in TRD §1.
+
+### Open decisions (owner action)
+| ID | Decision needed | Why it matters | Blocks | Owner | Suggested next step |
+|---|---|---|---|---|---|
+| OD-001 | Which legal entity/country holds the Stripe account? | Stripe's supported-country list must include the account's country; a Philippines-only entity may not qualify (verify on Stripe's site). | Production payments (TASK-028) | Owner | Check Stripe's current country list; consider an entity in a supported country, or switch provider via `/ec2build update` |
+| OD-002 | PayPal Business account with Payouts enabled | Payouts API requires enablement/approval | Production payouts (TASK-028) | Owner | Apply early; test in sandbox meanwhile |
+| OD-003 | Legal review: ToS, Privacy Notice (PH Data Privacy Act), Tester/Developer Rules, consumer refund terms, and compatibility with Google Play / Apple testing policies | Paying testers could conflict with store policies if not structured carefully; incentivized reviews are prohibited | Production (TASK-028) | Owner + counsel | Engage counsel; supply approved texts for UI-026 |
+| OD-004 | Tax and record-keeping obligations for platform revenue and tester payouts (e.g., BIR), possible need to collect tax info | Compliance; may add fields (TIN) and flows | Production payouts | Owner + accountant | Accountant consultation; may trigger schema update |
+| OD-005 | Final pricing, reward split, fee absorption | Unit economics after Stripe + PayPal fees | Production settings | Owner | Model with current fee schedules |
+| OD-006 | Restrict sign-up to verified IT Philippines members? | Trust vs growth | R2 (no MVP block) | Owner | Decide verification method (e.g., invite codes) |
+| OD-007 | Permission to use "IT Philippines" name/branding | Brand/legal | Landing copy & logo | Owner | Obtain written permission or rebrand |
+| OD-008 | Production domain name | Email DNS, OAuth redirects, Stripe/PayPal webhooks | TASK-027/028 | Owner | Register domain |
+
+### Override log
+| Date | Item | Old | New | Rationale | By |
+|---|---|---|---|---|---|
+| 2026-10-11 | App name / slug (C-002) | itphteste / `itphteste` | TestKo PH / `testko-ph` | Owner requested full rename | Owner via `/ec2build update` |
+
+## 19. Change history
+Package = the six documents. Each document's own version is in its document control.
+
+| Package | Date | Change | Documents touched |
+|---|---|---|---|
+| 0.1.0 | 2026-10-11 | Initial package from brief + discovery round 1 (Play + TestFlight, Stripe, PayPal Payouts, check-ins + developer confirmation); Gauntlet repair pass 1 | all |
+| 0.2.0 | 2026-10-11 | Implementation plan rewritten as a copy/paste prompt sequence + autopilot + final check | IMPLEMENTATION_PLAN |
+| 0.3.0 | 2026-10-11 | Full rename itphteste → TestKo PH (slug `testko-ph`) | all |
+| 0.4.0 | 2026-10-11 | App flows redrawn as horizontal swimlanes (rows = users/systems, left-to-right) | APP_FLOW |
+| 0.5.0 | 2026-10-11 | Accounts setup (AUTO / ASSISTED / OWNER-ONLY), shared responsibility, PROMPT 00 | IMPLEMENTATION_PLAN |
+| 0.6.0 | 2026-10-11 | Simplified to six documents: context, assumptions, open decisions and history moved into PRD §16–§19; setup, shared responsibility and traceability moved into IMPLEMENTATION_PLAN §2A, §2B, Appendix A; validation report, manifest and project README removed | PRD, TRD, APP_FLOW, IMPLEMENTATION_PLAN |

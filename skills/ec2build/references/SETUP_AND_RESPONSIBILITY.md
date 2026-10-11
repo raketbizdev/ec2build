@@ -12,7 +12,7 @@ EC2Build is free and open source. The **third-party services** a project uses (d
 | iOS build | Local Xcode on macOS, or EAS Build | Apple Developer Program is paid |
 | Web hosting | A free tier that allows the project's use (check commercial-use terms) | e.g., Cloudflare Pages / Netlify; some free tiers are non-commercial only |
 | Store upload automation | fastlane (free, open source) or `eas submit` with a Google service account / App Store Connect API key | |
-Always state unavoidable third-party costs (e.g., Google Play developer registration, Apple Developer Program, payment processing fees) in `SETUP.md`. Prices change: tell the owner to confirm on the provider's site, and never present a price as verified unless it was checked.
+Always state unavoidable third-party costs (e.g., Google Play developer registration, Apple Developer Program, payment processing fees) in the plan's accounts setup section. Prices change: tell the owner to confirm on the provider's site, and never present a price as verified unless it was checked.
 
 ## 2. Automation levels (label every setup step)
 - **AUTO**: the agent runs it (CLI/API) once the owner has logged in or provided a token (e.g., `supabase projects create`, `supabase db push`, `stripe webhook_endpoints create`, `gh repo create`).
@@ -26,13 +26,12 @@ Logins use the provider's own CLI/browser flow (`supabase login`, `stripe login`
 3. The setup doctor checks that each variable is **present**, never its value.
 4. Separate test/sandbox keys from live keys; live keys only at production release with explicit owner approval.
 
-## 4. Required project outputs
-- `docs/SETUP.md`: **generated** from setup.json with `python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --render` (never hand-edited). Per service: purpose, cost note, environments (local/staging/production), automation level per step, exact owner steps with URLs, agent commands, env variable names, how it is verified, troubleshooting. Ordered so `local` works first with zero paid accounts where possible.
-- `docs/setup.json`: machine-readable version used by `scripts/doctor.py` (format below).
-- `docs/SHARED_RESPONSIBILITY.md`: project-specific responsibility matrix (section 6) plus each service's provider-side responsibilities.
-- The implementation plan starts with **PROMPT 00: accounts & environment setup** (uses SETUP.md, runs AUTO steps, walks ASSISTED steps, stops for OWNER-ONLY steps, ends with `doctor.py` green for `local`). Later prompts re-run the doctor for `staging`/`production` before deploying.
+## 4. Where this goes in the six documents
+- **IMPLEMENTATION_PLAN §2A "Accounts setup"**: a ```json block (format below) is the source; the human-readable steps between `<!-- setup:begin -->` and `<!-- setup:end -->` are generated from it with `python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --render` (never hand-edited). Per service: purpose, cost note, stages, steps labelled AUTO / ASSISTED / OWNER-ONLY with exact URLs, agent commands, env variable names, verification. Ordered so `local` works first with zero paid accounts where possible.
+- **IMPLEMENTATION_PLAN §2B "Shared responsibility"**: the project-specific matrix (section 6) plus each service's provider-side responsibilities.
+- The plan starts with **PROMPT 00: accounts & environment setup** (uses §2A, runs AUTO steps, walks ASSISTED steps, stops for OWNER-ONLY steps, ends with `doctor.py --stage local` green). Later prompts re-run the doctor for `staging`/`production` before deploying.
 
-### `setup.json` format (`ec2build-setup/1`)
+### Setup JSON format (`ec2build-setup/1`)
 ```json
 {"format": "ec2build-setup/1",
  "env_file": ".env.local",
@@ -53,7 +52,7 @@ Logins use the provider's own CLI/browser flow (`supabase login`, `stripe login`
 `stages` = where the service is needed. `env[stage]` lists variables needed for that stage (cumulative with earlier stages). `cli` = executables that must be on PATH.
 
 ### Doctor
-`python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --stage local|staging|production [--app <app-repo-dir>]` reports per service: CLIs found/missing, env vars present/missing (from the environment and `<app>/.env.local`), and the owner steps still to do. Exit code 1 when anything required for that stage is missing.
+`python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --stage local|staging|production [--app <app-repo-dir>]` reads the setup JSON from IMPLEMENTATION_PLAN.md and reports per service: CLIs found/missing, env vars present/missing (from the environment and `<app>/.env.local`), and the owner steps still to do. Exit code 1 when anything required for that stage is missing.
 
 ## 5. Provider playbook (verify details at setup time: providers change)
 | Service | Owner (one-time) | Agent can automate after login/token |
@@ -76,7 +75,7 @@ Legend: **R** = does it · **A** = accountable / approves · **S** = supports / 
 |---|---|---|---|---|
 | Product decisions, scope, pricing | A/R | S (proposes, records assumptions) | — | — |
 | Spec quality & cross-doc consistency | A (approves) | R | S (reports conflicts) | — |
-| Accounts, terms, identity/KYC, billing with providers | A/R | S (SETUP.md, links, checks) | S (verifies with doctor) | R (their platform) |
+| Accounts, terms, identity/KYC, billing with providers | A/R | S (setup guide, links, checks) | S (verifies with doctor) | R (their platform) |
 | Creating & storing secrets | A/R | S (lists names, rules) | S (uses via env only, never prints) | R (key issuance, rotation tools) |
 | Provisioning (DB project, hosting, webhooks, buckets) | A (authorises) | S (plans) | R (AUTO steps) | R (runs the infrastructure) |
 | Application code, tests, migrations | A (reviews/approves merges) | S (prompts, acceptance criteria) | R | — |

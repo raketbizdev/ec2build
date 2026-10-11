@@ -2,12 +2,13 @@
 """EC2Build setup doctor: is everything ready for a stage? Never prints secret values.
 
 Usage:  python3 <SKILL_DIR>/scripts/doctor.py <project-dir> [--stage local|staging|production] [--app <app-repo-dir>]
-        python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --render     # (re)generate docs/SETUP.md from setup.json
-Reads <project-dir>/docs/setup.json (format ec2build-setup/1, see references/SETUP_AND_RESPONSIBILITY.md).
+        python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --render     # regenerate the setup steps in IMPLEMENTATION_PLAN §2A
+Reads the ```json block with "format": "ec2build-setup/1" in <project-dir>/docs/IMPLEMENTATION_PLAN.md
+(see references/SETUP_AND_RESPONSIBILITY.md).
 Env vars are looked up in the process environment and in <app>/<env_file> (default .env.local).
 Exit code 1 when a CLI or env var required for the stage is missing.
 """
-import json, os, pathlib, shutil, sys
+import json, os, pathlib, re, shutil, sys
 
 for _s in (sys.stdout, sys.stderr):
     try: _s.reconfigure(encoding='utf-8', errors='replace')
@@ -26,9 +27,20 @@ def read_env_file(path):
                     names.add(key.replace("export ", "").strip())
     return names
 
+BLOCK = re.compile(r"```json\n(\{\s*\"format\":\s*\"ec2build-setup/1\".*?)\n```", re.S)
+MARK = re.compile(r"<!-- setup:begin -->.*?<!-- setup:end -->", re.S)
+
+def plan_path(project):
+    return project / "docs" / "IMPLEMENTATION_PLAN.md"
+
+def load_spec(project):
+    m = BLOCK.search(plan_path(project).read_text(encoding='utf-8'))
+    if not m:
+        sys.exit("IMPLEMENTATION_PLAN.md has no ```json block with \"format\": \"ec2build-setup/1\" (section 2A)")
+    return json.loads(m.group(1))
+
 def render(project, spec):
-    o = [f"# SETUP — accounts & environment ({project.resolve().name})", "",
-         "Generated from `docs/setup.json` by the EC2Build doctor. Do not edit by hand; update setup.json and re-render.", "",
+    o = ["<!-- setup:begin -->", "_Generated from the JSON block below by the EC2Build doctor; edit the JSON, then re-render._", "",
          "**Levels:** AUTO = the agent runs it after you log in · ASSISTED = you follow exact steps, the agent verifies · "
          "OWNER-ONLY = legally yours (terms, payments, identity).", "",
          f"**Secrets:** put values only in `{spec.get('env_file', '.env.local')}` of the app repo (or your host's env settings). "
@@ -37,13 +49,13 @@ def render(project, spec):
     for svc in spec["services"]:
         o.append(f"| {svc['name']} | {', '.join(svc.get('stages', []))} | {svc.get('cost', '')} |")
     for stage in STAGES:
-        o += ["", f"## Stage: {stage}"]
+        o += ["", f"#### Stage: {stage}"]
         for svc in spec["services"]:
             steps = [s for s in svc.get("steps", []) if s.get("stage", "local") == stage]
             env = svc.get("env", {}).get(stage, [])
             if not steps and not env:
                 continue
-            o += ["", f"### {svc['name']}: {svc.get('purpose', '')}"]
+            o += ["", f"**{svc['name']}**: {svc.get('purpose', '')}"]
             if svc.get("cli") and stage == svc.get("stages", ["local"])[0]:
                 o.append(f"- Tools on PATH: {', '.join('`'+c+'`' for c in svc['cli'])}")
             for i, s in enumerate(steps, 1):
@@ -52,8 +64,12 @@ def render(project, spec):
                 o.append(f"- Env variables (names only): {', '.join('`'+e+'`' for e in env)}")
             if svc.get("verify", {}).get(stage):
                 o.append(f"- Verify: `{svc['verify'][stage]}`")
-    (project / "docs" / "SETUP.md").write_text("\n".join(o) + "\n", encoding='utf-8')
-    print("wrote", project / "docs" / "SETUP.md")
+    o.append("<!-- setup:end -->")
+    path = plan_path(project); text = path.read_text(encoding='utf-8')
+    if not MARK.search(text):
+        sys.exit("IMPLEMENTATION_PLAN.md needs <!-- setup:begin --> / <!-- setup:end --> markers in section 2A")
+    path.write_text(MARK.sub(lambda _: "\n".join(o), text), encoding='utf-8')
+    print("updated setup steps in", path)
 
 def main(argv):
     args = argv[1:]
@@ -64,9 +80,9 @@ def main(argv):
     app = pathlib.Path(args[args.index("--app") + 1]) if "--app" in args else None
     if stage not in STAGES:
         sys.exit(f"--stage must be one of {STAGES}")
-    spec = json.loads((project / "docs" / "setup.json").read_text(encoding='utf-8'))
+    spec = load_spec(project)
     if spec.get("format") != "ec2build-setup/1":
-        sys.exit("setup.json: unsupported format")
+        sys.exit("setup JSON: unsupported format")
     if "--render" in args:
         render(project, spec); return 0
     upto = STAGES[: STAGES.index(stage) + 1]
@@ -95,7 +111,7 @@ def main(argv):
         if svc.get("verify", {}).get(stage):
             print(f"  verify with: {svc['verify'][stage]}")
     print(f"\n{'All required items present' if not problems else f'{problems} required item(s) missing'} for stage '{stage}'. "
-          "Owner steps marked • are reminders; mark them \"done\": true in setup.json once completed.")
+          "Owner steps marked • are reminders; mark them \"done\": true in the setup JSON (IMPLEMENTATION_PLAN §2A) once completed.")
     return 1 if problems else 0
 
 if __name__ == "__main__":

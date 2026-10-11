@@ -4,9 +4,9 @@
 | Field | Value |
 |---|---|
 | Document | `TRD.md` (02) |
-| Version | 0.2.0 · draft |
+| Version | 0.2.1 · draft |
 | Date | 2026-10-11 |
-| Upstream | PRD 0.2.0 |
+| Upstream | PRD 0.3.0 |
 | Downstream | APP_FLOW, DATABASE_SCHEMA, IMPLEMENTATION_PLAN |
 | Version policy | No library versions are asserted here. TASK-001 pins the then-current stable releases in `package.json`/lockfile and records them in `docs/ec2build/STACK_VERSIONS.md`. |
 
@@ -323,7 +323,7 @@ Deploy: Vercel preview per PR; staging on `staging` branch; production on `main`
 Radix primitives, semantic HTML, `next/font` self-hosted, image optimisation for icons, route-level code splitting, Lighthouse CI budget: performance ≥ 85 mobile on UI-001/UI-007, accessibility ≥ 95.
 
 ## 17. API ↔ FR ↔ component ↔ task links
-See `TRACEABILITY.md`. Implementation tasks: API-001 → TASK-008; API-002 → TASK-009; API-003 → TASK-010; API-004 → TASK-011; API-005/006 → TASK-012; API-024 → TASK-013; API-016 → TASK-014; API-007/008 → TASK-015; API-009/010 → TASK-016; API-011 → TASK-017; API-021 → TASK-018 (job bodies also in TASK-012, 013, 021, 023, 024); API-012/013 → TASK-019; API-014/015 → TASK-020; API-017/018 → TASK-021; API-019/020/025 → TASK-022; API-022 → TASK-007; API-023 → TASK-023.
+See IMPLEMENTATION_PLAN Appendix A. Implementation tasks: API-001 → TASK-008; API-002 → TASK-009; API-003 → TASK-010; API-004 → TASK-011; API-005/006 → TASK-012; API-024 → TASK-013; API-016 → TASK-014; API-007/008 → TASK-015; API-009/010 → TASK-016; API-011 → TASK-017; API-021 → TASK-018 (job bodies also in TASK-012, 013, 021, 023, 024); API-012/013 → TASK-019; API-014/015 → TASK-020; API-017/018 → TASK-021; API-019/020/025 → TASK-022; API-022 → TASK-007; API-023 → TASK-023.
 
 ## 18. Unresolved technical questions
 | # | Question | Impact | Owner |

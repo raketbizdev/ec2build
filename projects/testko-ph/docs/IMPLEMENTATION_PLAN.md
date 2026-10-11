@@ -4,9 +4,9 @@
 | Field | Value |
 |---|---|
 | Document | `IMPLEMENTATION_PLAN.md` (06) |
-| Version | 0.4.0 · draft |
+| Version | 0.5.0 · draft |
 | Date | 2026-10-11 |
-| Source of truth | `PRD.md@0.2.0`, `TRD.md@0.2.0`, `APP_FLOW.md@0.3.0`, `DESIGN_BRIEF.md@0.2.0`, `DATABASE_SCHEMA.md@0.2.0`, this file `@0.3.0` |
+| Source of truth | `PRD.md@0.3.0`, `TRD.md@0.2.1`, `APP_FLOW.md@0.3.1`, `DESIGN_BRIEF.md@0.2.0`, `DATABASE_SCHEMA.md@0.2.0`, this file `@0.3.0` |
 | Status of execution | **Nothing has been implemented.** No task below is complete. Progress is recorded only in `docs/ec2build/PROGRESS.md` of the app repo with evidence. |
 
 ## 1. Execution contract
@@ -41,12 +41,537 @@
 | Resend account + sending domain (DNS) | available | needed by TASK-008 (local can use Supabase Inbucket/Mailpit) |
 | Open decisions OD-001…OD-004 | may be open in dev; **must be closed before TASK-028** | release-blocking |
 
+## 2A. Accounts setup (input for PROMPT 00)
+EC2Build is free; the services below run on the owner's own accounts. The JSON block is the source; the steps list between the markers is generated from it (`npx ec2build doctor <project> --render`) and checked with `npx ec2build doctor <project> --stage local`.
+
+<!-- setup:begin -->
+_Generated from the JSON block below by the EC2Build doctor; edit the JSON, then re-render._
+
+**Levels:** AUTO = the agent runs it after you log in · ASSISTED = you follow exact steps, the agent verifies · OWNER-ONLY = legally yours (terms, payments, identity).
+
+**Secrets:** put values only in `.env.local` of the app repo (or your host's env settings). Never paste them into chat. Check progress with `/ec2build doctor --stage <stage>`.
+
+| Service | Needed for | Cost note |
+|---|---|---|
+| Local toolchain | local, staging, production | Free |
+| Supabase | local, staging, production | Local: free. Cloud: free tier (limits; idle projects may pause); Pro plan recommended for production backups (TQ-4) |
+| Stripe | local, staging, production | No monthly fee; per-transaction fees. Account country support must be confirmed (OD-001) |
+| PayPal Payouts | local, staging, production | Sandbox free; per-payout fees in live (confirm); Payouts must be enabled (OD-002) |
+| Resend (email) | staging, production | Free tier available; confirm limits |
+| Vercel (web hosting + cron) | staging, production | Free Hobby plan is for non-commercial use; the TRD assumes Pro (paid) for commercial use and sub-daily cron (A-016). A free commercial-friendly host would need a TRD update. |
+| GitHub | staging, production | Free tier available |
+| Sentry | staging, production | Free developer tier available |
+| Domain | production | Paid (yearly, varies by registrar) |
+
+#### Stage: local
+
+**Local toolchain**: Node.js, pnpm, git, Docker for local development
+- Tools on PATH: `node`, `pnpm`, `git`, `docker`
+1. **OWNER-ONLY** (you): Install Docker Desktop (https://www.docker.com/products/docker-desktop/) and start it
+2. **AUTO** (agent): Install pnpm via corepack (corepack enable) and generate CRON_SECRET / AUDIT_IP_SALT with openssl rand -hex 32 into .env.local
+- Env variables (names only): `NEXT_PUBLIC_APP_URL`, `CRON_SECRET`, `AUDIT_IP_SALT`
+- Verify: `node -v && pnpm -v && docker info`
+
+**Supabase**: Postgres database, auth, storage (DB-001…DB-018)
+- Tools on PATH: `supabase`
+1. **AUTO** (agent): supabase init && supabase start; copy API URL / anon key / service_role key from `supabase status` into .env.local
+- Env variables (names only): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- Verify: `supabase status`
+
+**Stripe**: Developer payments and refunds (FR-007, FR-013)
+- Tools on PATH: `stripe`
+1. **OWNER-ONLY** (you): Create a Stripe account at https://dashboard.stripe.com/register (test mode is enough for local/staging)
+2. **ASSISTED** (you): Run `stripe login`; copy the test secret key (Developers > API keys) into .env.local as STRIPE_SECRET_KEY
+3. **AUTO** (agent): stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe; owner pastes the printed whsec_ value into .env.local as STRIPE_WEBHOOK_SECRET
+- Env variables (names only): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- Verify: `stripe config --list`
+
+**PayPal Payouts**: Tester payouts (FR-023)
+1. **OWNER-ONLY** (you): Log in at https://developer.paypal.com with a PayPal account
+2. **ASSISTED** (you): Apps & Credentials > Sandbox > Create App; put Client ID/Secret in .env.local; PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+- Env variables (names only): `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_API_BASE`
+- Verify: `agent runs an OAuth token request against the sandbox and reports success (no secrets printed)`
+
+#### Stage: staging
+
+**Supabase**: Postgres database, auth, storage (DB-001…DB-018)
+1. **OWNER-ONLY** (you): Create a Supabase account and organisation at https://supabase.com/dashboard
+2. **ASSISTED** (you): Run `supabase login` (browser) or create an access token (Account > Access Tokens) and put it in .env.local as SUPABASE_ACCESS_TOKEN
+3. **AUTO** (agent): supabase projects create testko-ph-staging --region ap-southeast-1; supabase link; supabase db push
+- Env variables (names only): `SUPABASE_ACCESS_TOKEN`
+- Verify: `supabase projects list`
+
+**Stripe**: Developer payments and refunds (FR-007, FR-013)
+1. **AUTO** (agent): Register the staging webhook endpoint via Stripe CLI/API with the events in TRD §7.1
+
+**PayPal Payouts**: Tester payouts (FR-023)
+1. **AUTO** (agent): Register the staging webhook via PayPal REST API (POST /v1/notifications/webhooks); owner copies the webhook id into env as PAYPAL_WEBHOOK_ID
+- Env variables (names only): `PAYPAL_WEBHOOK_ID`
+
+**Resend (email)**: Transactional email + Supabase Auth SMTP (FR-027)
+1. **OWNER-ONLY** (you): Create a Resend account at https://resend.com and an API key
+2. **ASSISTED** (you): Add the DNS records Resend shows for your sending domain (needs a domain, OD-008)
+3. **AUTO** (agent): Send a test email and configure Supabase Auth SMTP settings
+- Env variables (names only): `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`
+- Verify: `agent sends a test email to ADMIN_ALERT_EMAIL`
+
+**Vercel (web hosting + cron)**: Host the Next.js app and run cron jobs (ADR-001, ADR-006)
+- Tools on PATH: `vercel`
+1. **OWNER-ONLY** (you): Create a Vercel account at https://vercel.com and choose a plan
+2. **ASSISTED** (you): Run `vercel login`
+3. **AUTO** (agent): vercel link; vercel env add (owner types each secret value at the prompt); vercel deploy
+- Verify: `curl -fsS <staging-url>/api/health`
+
+**GitHub**: Code hosting and CI (TRD §14)
+- Tools on PATH: `gh`
+1. **ASSISTED** (you): Run `gh auth login`
+2. **AUTO** (agent): gh repo create (private) and push; gh secret set for CI (owner types values)
+- Verify: `gh auth status`
+
+**Sentry**: Error tracking (NFR-007)
+1. **OWNER-ONLY** (you): Create a Sentry account and a Next.js project at https://sentry.io; copy the DSN into env
+- Env variables (names only): `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`
+- Verify: `agent triggers a test error and confirms it appears`
+
+#### Stage: production
+
+**Supabase**: Postgres database, auth, storage (DB-001…DB-018)
+1. **OWNER-ONLY** (you): Approve creating the production project and choose the plan
+
+**Stripe**: Developer payments and refunds (FR-007, FR-013)
+1. **OWNER-ONLY** (you): Activate live mode (business verification) and approve live keys
+
+**PayPal Payouts**: Tester payouts (FR-023)
+1. **OWNER-ONLY** (you): PayPal Business account with Payouts enabled; approve live credentials
+
+**Domain**: Production URL, email sending domain (OD-008)
+1. **OWNER-ONLY** (you): Buy the domain and give the agent access to edit DNS or apply records it lists
+- Verify: `dig +short <domain>`
+<!-- setup:end -->
+
+```json
+{
+  "format": "ec2build-setup/1",
+  "env_file": ".env.local",
+  "services": [
+    {
+      "id": "toolchain",
+      "name": "Local toolchain",
+      "purpose": "Node.js, pnpm, git, Docker for local development",
+      "stages": [
+        "local",
+        "staging",
+        "production"
+      ],
+      "cost": "Free",
+      "cli": [
+        "node",
+        "pnpm",
+        "git",
+        "docker"
+      ],
+      "env": {
+        "local": [
+          "NEXT_PUBLIC_APP_URL",
+          "CRON_SECRET",
+          "AUDIT_IP_SALT"
+        ]
+      },
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "local",
+          "text": "Install Docker Desktop (https://www.docker.com/products/docker-desktop/) and start it"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "local",
+          "text": "Install pnpm via corepack (corepack enable) and generate CRON_SECRET / AUDIT_IP_SALT with openssl rand -hex 32 into .env.local"
+        }
+      ],
+      "verify": {
+        "local": "node -v && pnpm -v && docker info"
+      }
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase",
+      "purpose": "Postgres database, auth, storage (DB-001…DB-018)",
+      "stages": [
+        "local",
+        "staging",
+        "production"
+      ],
+      "cost": "Local: free. Cloud: free tier (limits; idle projects may pause); Pro plan recommended for production backups (TQ-4)",
+      "cli": [
+        "supabase"
+      ],
+      "env": {
+        "local": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ],
+        "staging": [
+          "SUPABASE_ACCESS_TOKEN"
+        ]
+      },
+      "steps": [
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "local",
+          "text": "supabase init && supabase start; copy API URL / anon key / service_role key from `supabase status` into .env.local"
+        },
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "staging",
+          "text": "Create a Supabase account and organisation at https://supabase.com/dashboard"
+        },
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "staging",
+          "text": "Run `supabase login` (browser) or create an access token (Account > Access Tokens) and put it in .env.local as SUPABASE_ACCESS_TOKEN"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "supabase projects create testko-ph-staging --region ap-southeast-1; supabase link; supabase db push"
+        },
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "production",
+          "text": "Approve creating the production project and choose the plan"
+        }
+      ],
+      "verify": {
+        "local": "supabase status",
+        "staging": "supabase projects list"
+      }
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "purpose": "Developer payments and refunds (FR-007, FR-013)",
+      "stages": [
+        "local",
+        "staging",
+        "production"
+      ],
+      "cost": "No monthly fee; per-transaction fees. Account country support must be confirmed (OD-001)",
+      "cli": [
+        "stripe"
+      ],
+      "env": {
+        "local": [
+          "STRIPE_SECRET_KEY",
+          "STRIPE_WEBHOOK_SECRET"
+        ]
+      },
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "local",
+          "text": "Create a Stripe account at https://dashboard.stripe.com/register (test mode is enough for local/staging)"
+        },
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "local",
+          "text": "Run `stripe login`; copy the test secret key (Developers > API keys) into .env.local as STRIPE_SECRET_KEY"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "local",
+          "text": "stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe; owner pastes the printed whsec_ value into .env.local as STRIPE_WEBHOOK_SECRET"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "Register the staging webhook endpoint via Stripe CLI/API with the events in TRD §7.1"
+        },
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "production",
+          "text": "Activate live mode (business verification) and approve live keys"
+        }
+      ],
+      "verify": {
+        "local": "stripe config --list"
+      }
+    },
+    {
+      "id": "paypal",
+      "name": "PayPal Payouts",
+      "purpose": "Tester payouts (FR-023)",
+      "stages": [
+        "local",
+        "staging",
+        "production"
+      ],
+      "cost": "Sandbox free; per-payout fees in live (confirm); Payouts must be enabled (OD-002)",
+      "cli": [],
+      "env": {
+        "local": [
+          "PAYPAL_CLIENT_ID",
+          "PAYPAL_CLIENT_SECRET",
+          "PAYPAL_API_BASE"
+        ],
+        "staging": [
+          "PAYPAL_WEBHOOK_ID"
+        ]
+      },
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "local",
+          "text": "Log in at https://developer.paypal.com with a PayPal account"
+        },
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "local",
+          "text": "Apps & Credentials > Sandbox > Create App; put Client ID/Secret in .env.local; PAYPAL_API_BASE=https://api-m.sandbox.paypal.com"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "Register the staging webhook via PayPal REST API (POST /v1/notifications/webhooks); owner copies the webhook id into env as PAYPAL_WEBHOOK_ID"
+        },
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "production",
+          "text": "PayPal Business account with Payouts enabled; approve live credentials"
+        }
+      ],
+      "verify": {
+        "local": "agent runs an OAuth token request against the sandbox and reports success (no secrets printed)"
+      }
+    },
+    {
+      "id": "resend",
+      "name": "Resend (email)",
+      "purpose": "Transactional email + Supabase Auth SMTP (FR-027)",
+      "stages": [
+        "staging",
+        "production"
+      ],
+      "cost": "Free tier available; confirm limits",
+      "cli": [],
+      "env": {
+        "staging": [
+          "RESEND_API_KEY",
+          "EMAIL_FROM",
+          "ADMIN_ALERT_EMAIL"
+        ]
+      },
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "staging",
+          "text": "Create a Resend account at https://resend.com and an API key"
+        },
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "staging",
+          "text": "Add the DNS records Resend shows for your sending domain (needs a domain, OD-008)"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "Send a test email and configure Supabase Auth SMTP settings"
+        }
+      ],
+      "verify": {
+        "staging": "agent sends a test email to ADMIN_ALERT_EMAIL"
+      }
+    },
+    {
+      "id": "hosting",
+      "name": "Vercel (web hosting + cron)",
+      "purpose": "Host the Next.js app and run cron jobs (ADR-001, ADR-006)",
+      "stages": [
+        "staging",
+        "production"
+      ],
+      "cost": "Free Hobby plan is for non-commercial use; the TRD assumes Pro (paid) for commercial use and sub-daily cron (A-016). A free commercial-friendly host would need a TRD update.",
+      "cli": [
+        "vercel"
+      ],
+      "env": {},
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "staging",
+          "text": "Create a Vercel account at https://vercel.com and choose a plan"
+        },
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "staging",
+          "text": "Run `vercel login`"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "vercel link; vercel env add (owner types each secret value at the prompt); vercel deploy"
+        }
+      ],
+      "verify": {
+        "staging": "curl -fsS <staging-url>/api/health"
+      }
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "purpose": "Code hosting and CI (TRD §14)",
+      "stages": [
+        "staging",
+        "production"
+      ],
+      "cost": "Free tier available",
+      "cli": [
+        "gh"
+      ],
+      "env": {},
+      "steps": [
+        {
+          "who": "owner",
+          "level": "ASSISTED",
+          "stage": "staging",
+          "text": "Run `gh auth login`"
+        },
+        {
+          "who": "agent",
+          "level": "AUTO",
+          "stage": "staging",
+          "text": "gh repo create (private) and push; gh secret set for CI (owner types values)"
+        }
+      ],
+      "verify": {
+        "staging": "gh auth status"
+      }
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry",
+      "purpose": "Error tracking (NFR-007)",
+      "stages": [
+        "staging",
+        "production"
+      ],
+      "cost": "Free developer tier available",
+      "cli": [],
+      "env": {
+        "staging": [
+          "SENTRY_DSN",
+          "NEXT_PUBLIC_SENTRY_DSN"
+        ]
+      },
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "staging",
+          "text": "Create a Sentry account and a Next.js project at https://sentry.io; copy the DSN into env"
+        }
+      ],
+      "verify": {
+        "staging": "agent triggers a test error and confirms it appears"
+      }
+    },
+    {
+      "id": "domain",
+      "name": "Domain",
+      "purpose": "Production URL, email sending domain (OD-008)",
+      "stages": [
+        "production"
+      ],
+      "cost": "Paid (yearly, varies by registrar)",
+      "cli": [],
+      "env": {},
+      "steps": [
+        {
+          "who": "owner",
+          "level": "OWNER-ONLY",
+          "stage": "production",
+          "text": "Buy the domain and give the agent access to edit DNS or apply records it lists"
+        }
+      ],
+      "verify": {
+        "production": "dig +short <domain>"
+      }
+    }
+  ]
+}
+```
+
+## 2B. Shared responsibility
+Who does what, from planning to running the live marketplace. Legend: **R** = does it · **A** = accountable / approves · **S** = supports / guides · **—** = not involved.
+EC2Build (the spec agent) is free. The services below run on the **owner's own accounts** (see IMPLEMENTATION_PLAN §2A for costs and steps).
+
+### 1. Matrix
+| Area | You (owner / TestKo PH operator) | EC2Build agent | Coding agent | Providers |
+|---|---|---|---|---|
+| Product scope, pricing (A-003/OD-005), timing rules | A/R | S: proposes, records assumptions | — | — |
+| Spec consistency (six docs, traceability) | A: approves | R | S: reports conflicts | — |
+| Accounts & terms: Supabase, Stripe, PayPal, Resend, Vercel, GitHub, Sentry, domain | A/R | S: IMPLEMENTATION_PLAN §2A, links | S: verifies with doctor | R: their platforms |
+| Business verification / KYC (Stripe live, PayPal Business + Payouts) | A/R | S: flags OD-001/OD-002 | — | R: approval decisions |
+| Secrets (API keys, webhook secrets, service-role key) | A/R: create, store in `.env.local` / host env | S: lists names, rules | S: uses via env only, never prints or commits | R: issuance, rotation |
+| Provisioning (Supabase projects, buckets, webhooks, Vercel project, cron) | A: authorises each stage | S | R: AUTO steps | R: runs infrastructure |
+| Code, migrations, tests (TASK-001…028) | A: reviews each PROMPT report, approves commits | S: prompts + acceptance criteria | R | — |
+| App security: RLS, ledger integrity, webhook verification, rate limits | A: accepts residual risk | R: specifies (TRD §10, SCHEMA §7) | R: implements + tests (TEST-005, 009, 020–024) | — |
+| Platform security & uptime (DB servers, hosting, card data at Stripe) | — | — | — | R |
+| Campaign approval, disputes, payout approval, fraud review | A/R: admin role | S: rules in PRD | R: builds admin tools | — |
+| Money movement (charges, refunds, payouts) | A: approves payout batches; owns losses (e.g., chargebacks R-03) | S | R: implements idempotent flows | R: processing per their terms |
+| Legal: ToS, privacy notice (PH Data Privacy Act), tester/developer rules, tax (OD-003/OD-004) | A/R with counsel/accountant | S: flags issues | R: publishes approved texts | — |
+| Store programs (Google Play closed testing, TestFlight) | — (TestKo PH itself is a web app) | S: explains rules to users | — | R: Google/Apple decide production access |
+| Developers' own Play Console / App Store Connect accounts | — | — | — | Each **developer user** is responsible for adding tester emails and their own store compliance |
+| End-user data (testers' emails, PayPal emails, screenshots) | A/R: data controller | S: retention/deletion spec (NFR-012) | R: deletion & retention jobs | R: processors per their terms |
+| Staging & production deployment, live keys | A: explicit approval (PROMPT 27/28) | S | R: executes after approval | R: hosting |
+| Monitoring, backups, incidents, daily admin queues | A/R | S: runbooks | R: alerts, reconciliation, scripts | R: platform backups/status pages |
+| Costs and usage limits | A/R | S: notes cost drivers (TRD §13) | S: reports usage | R: billing |
+
+### 2. Lines nobody crosses
+- No agent accepts terms, pays fees, verifies identity, answers store/policy declarations or turns on live money for you.
+- No agent asks you to paste secrets into chat; values go into `.env.local` or your host's settings.
+- Anything outside your machine (creating cloud projects, deploying, sending real payouts) needs your approval first, and the agent reports the real result.
+
+### 3. Provider-side responsibilities (summary; their terms prevail)
+| Provider | They are responsible for |
+|---|---|
+| Supabase | Database/auth/storage infrastructure, platform security, backups per plan |
+| Stripe | Card data security (hosted Checkout), payment processing, disputes process |
+| PayPal | Payout delivery, recipient account handling, holds/returns |
+| Vercel | Hosting, edge network, cron execution per plan |
+| Resend | Email delivery infrastructure |
+| GitHub | Code hosting, Actions runners |
+| Sentry | Error data storage per their retention |
+
 ## 3. Milestones, DAG and estimates
 Estimates are rough, for one experienced engineer + coding agent; they are **estimates, not commitments**.
 
 | Task | Title | Phase | Prereqs | Owner | Est. | Milestone | Risk |
 |---|---|---|---|---|---|---|---|
-| TASK-000 | Accounts & environment setup (SETUP.md, doctor) | 0 Foundation | — | Human + agent | 0.5 d | M0 | med |
+| TASK-000 | Accounts & environment setup (IMPLEMENTATION_PLAN §2A, doctor) | 0 Foundation | — | Human + agent | 0.5 d | M0 | med |
 | TASK-001 | Preflight & repository bootstrap | 0 Foundation | TASK-000 (local stage) | Agent + human (accounts) | 0.5 d | M0 | low |
 | TASK-002 | Tooling, test harness, CI skeleton | 0 | 001 | Agent | 0.5 d | M0 | low |
 | TASK-003 | Design tokens, UI kit, layouts, error & legal pages | 0 | 002 | Agent | 1.5 d | M0 | low |
@@ -162,7 +687,7 @@ Before PROMPT 01, the coding agent must be able to read this package (PROMPT 01 
 ```text
 TASK-000 — Accounts & environment setup
 ROLE: Act as a setup assistant and senior DevOps engineer. Follow the shared responsibility model.
-SOURCE OF TRUTH: docs/SETUP.md and docs/setup.json (generated), docs/SHARED_RESPONSIBILITY.md, TRD.md@0.2.0 §4, §7.
+SOURCE OF TRUTH: IMPLEMENTATION_PLAN §2A and the setup JSON in IMPLEMENTATION_PLAN §2A (generated), IMPLEMENTATION_PLAN §2B, TRD.md@0.2.1 §4, §7.
 REQUIREMENTS: NFR-001 (secrets), NFR-007, NFR-014; OD-001…OD-004 (production only).
 PREREQUISITES: none. <SKILL_DIR> = where the ec2build skill is installed (e.g., ~/.claude/skills/ec2build, or skills/ec2build in the EC2Build repo).
   Stage for this run: local (staging/production are re-checked in PROMPT 27/28).
@@ -171,12 +696,12 @@ CONTRACT: Never ask me to paste secrets into chat; I put values into .env.local 
   or verify identity for me. Use the provider's own login flow (supabase login, stripe login, gh auth login...).
 INSTRUCTIONS:
 1. Run: python3 <SKILL_DIR>/scripts/doctor.py <this-project-dir> --stage local [--app <app-repo-dir> if it exists].
-2. For each missing item, in SETUP.md order:
+2. For each missing item, in IMPLEMENTATION_PLAN §2A order:
    - AUTO steps: run them (e.g., corepack enable; generate CRON_SECRET and AUDIT_IP_SALT into .env.local with openssl rand -hex 32).
    - ASSISTED steps: give me the exact URL, clicks and field names, wait for me to say done, then verify.
    - OWNER-ONLY steps: tell me what to do and why only I can do it; continue with other items meanwhile.
 3. Install missing CLIs only with my approval (e.g., Docker Desktop, Stripe CLI via Homebrew), showing the command first.
-4. When I confirm an owner step, set "done": true for it in docs/setup.json.
+4. When I confirm an owner step, set "done": true for it in the setup JSON in IMPLEMENTATION_PLAN §2A.
 5. Re-run the doctor until it reports 0 missing items for stage local, or list exactly what is still blocked and by whom.
 DO NOT: create cloud projects, deploy, or use live keys in this prompt; print any secret value.
 DONE WHEN: doctor exits 0 for --stage local (with --app once the app repo exists after PROMPT 01–04), or blockers are listed with owners.
@@ -191,8 +716,8 @@ NEXT: TASK-001.
 ```text
 TASK-001 — Preflight & repository bootstrap
 ROLE: Act as a senior engineer specializing in Next.js/TypeScript project setup.
-SOURCE OF TRUTH: PRD.md@0.2.0, TRD.md@0.2.0, APP_FLOW.md@0.3.0, DESIGN_BRIEF.md@0.2.0,
-DATABASE_SCHEMA.md@0.2.0, IMPLEMENTATION_PLAN.md@0.4.0.
+SOURCE OF TRUTH: PRD.md@0.3.0, TRD.md@0.2.1, APP_FLOW.md@0.3.1, DESIGN_BRIEF.md@0.2.0,
+DATABASE_SCHEMA.md@0.2.0, IMPLEMENTATION_PLAN.md@0.5.0
 REQUIREMENTS: NFR-010; ADR-001; TRD §3.1, §4.
 PREREQUISITES: owner approval to start; tools installed.
 OBJECTIVE: Create the app repository with Next.js + TypeScript + Tailwind + pnpm, copy the EC2Build docs, record toolchain versions and preflight findings
@@ -208,7 +733,7 @@ INSTRUCTIONS:
 2. Create the app (indicative command; confirm flags with `--help` first):
    pnpm create next-app@latest testko-ph --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm
 3. git init; first commit of the generated skeleton.
-4. Copy projects/testko-ph/docs/ recursively (including docs/diagrams/), and manifest.json into docs/ec2build/ unchanged.
+4. Copy the six documents and the docs/diagrams/ folder from projects/testko-ph/docs/ into docs/ec2build/ unchanged.
 5. Write .env.example with every variable name from TRD §4 and fake example values only.
    Ensure .gitignore excludes .env* except .env.example.
 6. Set tsconfig "strict": true and "noUncheckedIndexedAccess": true.
@@ -233,7 +758,7 @@ NEXT: TASK-002.
 ```text
 TASK-002 — Tooling, test harness, CI skeleton
 ROLE: Act as a senior engineer specializing in TypeScript tooling and CI.
-SOURCE OF TRUTH: TRD.md@0.2.0 §4, §14, §15; IMPLEMENTATION_PLAN.md@0.4.0.
+SOURCE OF TRUTH: TRD.md@0.2.1 §4, §14, §15; IMPLEMENTATION_PLAN.md@0.5.0
 REQUIREMENTS: NFR-001, NFR-006; ADR-010.
 PREREQUISITES: TASK-001 verified.
 OBJECTIVE: Prettier, ESLint rules, Vitest, Playwright, env validation, GitHub Actions CI with gates from TRD §14 (DB/e2e steps stubbed until later tasks)
@@ -271,7 +796,7 @@ NEXT: TASK-003 and TASK-004 (independent).
 ```text
 TASK-003 — Design tokens, UI kit, layouts, error & legal pages
 ROLE: Act as a senior front-end engineer specializing in accessible React/Tailwind design systems.
-SOURCE OF TRUTH: DESIGN_BRIEF.md@0.2.0 §3–§12; PRD.md@0.2.0 FR-032, NFR-006, NFR-009.
+SOURCE OF TRUTH: DESIGN_BRIEF.md@0.2.0 §3–§12; PRD.md@0.3.0 FR-032, NFR-006, NFR-009.
 REQUIREMENTS: FR-032; NFR-006, NFR-009, NFR-010; UI-025, UI-026; layouts for all UI-###.
 PREREQUISITES: TASK-002 verified.
 OBJECTIVE: Implement DESIGN_BRIEF tokens, shadcn/ui primitives, shared components (§6), public/app/admin layouts, UI-025 error pages, UI-026 legal pages (DRAFT content)
@@ -344,7 +869,7 @@ NEXT: TASK-005.
 ```text
 TASK-005 — RLS, listing view, pgTAP isolation suite
 ROLE: Act as a senior Postgres security engineer.
-SOURCE OF TRUTH: DATABASE_SCHEMA.md@0.2.0 §1.1, §7, §9.7, §9.9; TRD.md@0.2.0 §2.1, §10.
+SOURCE OF TRUTH: DATABASE_SCHEMA.md@0.2.0 §1.1, §7, §9.7, §9.9; TRD.md@0.2.1 §2.1, §10.
 REQUIREMENTS: NFR-001, NFR-003; FR-009; DB-017, DB-018.
 PREREQUISITES: TASK-004 verified.
 OBJECTIVE: Apply migration 0007 + storage 0009; prove isolation with pgTAP
@@ -379,7 +904,7 @@ NEXT: TASK-006.
 ```text
 TASK-006 — Service functions + state-machine tests
 ROLE: Act as a senior PostgreSQL engineer specializing in transactional money systems.
-SOURCE OF TRUTH: DATABASE_SCHEMA.md@0.2.0 §6, §9.8, §10; PRD.md@0.2.0 FR-011…FR-026; APP_FLOW.md@0.3.0 FLOW-006…FLOW-014.
+SOURCE OF TRUTH: DATABASE_SCHEMA.md@0.2.0 §6, §9.8, §10; PRD.md@0.3.0 FR-011…FR-026; APP_FLOW.md@0.3.1 FLOW-006…FLOW-014.
 REQUIREMENTS: as listed in the task table.
 PREREQUISITES: TASK-005 verified.
 OBJECTIVE: Implement every svc_* function in DATABASE_SCHEMA §9.8 with grants, and pgTAP tests covering state machines §6, concurrency guards and money invariants
@@ -419,7 +944,7 @@ NEXT: TASK-007.
 ```text
 TASK-007 — Server foundation & notifications
 ROLE: Act as a senior Next.js backend engineer.
-SOURCE OF TRUTH: TRD.md@0.2.0 §2.1, §3, §5.1, §5.3, §6, §10, §11; DATABASE_SCHEMA.md@0.2.0 DB-012, DB-013, DB-016; DESIGN_BRIEF.md@0.2.0 UI-017.
+SOURCE OF TRUTH: TRD.md@0.2.1 §2.1, §3, §5.1, §5.3, §6, §10, §11; DATABASE_SCHEMA.md@0.2.0 DB-012, DB-013, DB-016; DESIGN_BRIEF.md@0.2.0 UI-017.
 REQUIREMENTS: FR-027, FR-030; NFR-001, NFR-007, NFR-011; API-022; UI-017.
 PREREQUISITES: TASK-003 and TASK-006 verified.
 OBJECTIVE: Supabase clients, auth guards, HTTP envelope, DB error mapping, Origin check, rate limiter, audit helper, notification service, API-022, UI-017, header badge
@@ -456,7 +981,7 @@ NEXT: TASK-008.
 ```text
 TASK-008 — Authentication flows
 ROLE: Act as a senior engineer specializing in Supabase Auth with Next.js SSR.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-001, FR-032; APP_FLOW.md@0.3.0 FLOW-001, FLOW-002; DESIGN_BRIEF.md@0.2.0 UI-002…UI-004; TRD.md@0.2.0 §6, §7.3.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-001, FR-032; APP_FLOW.md@0.3.1 FLOW-001, FLOW-002; DESIGN_BRIEF.md@0.2.0 UI-002…UI-004; TRD.md@0.2.1 §6, §7.3.
 REQUIREMENTS: FR-001; NFR-011, NFR-014; API-001; UI-002, UI-003, UI-004.
 PREREQUISITES: TASK-007 verified.
 OBJECTIVE: UI-002, UI-003, UI-004, auth callback, sign-out, SMTP via Resend, auth rate limits
@@ -490,7 +1015,7 @@ NEXT: TASK-009.
 ```text
 TASK-009 — Onboarding, roles, profile, PayPal email
 ROLE: Act as a senior full-stack engineer (Next.js + Supabase).
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-002, FR-004, FR-032; APP_FLOW.md@0.3.0 FLOW-001, FLOW-003; DESIGN_BRIEF.md@0.2.0 UI-005, UI-006; TRD.md@0.2.0 API-002, §6.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-002, FR-004, FR-032; APP_FLOW.md@0.3.1 FLOW-001, FLOW-003; DESIGN_BRIEF.md@0.2.0 UI-005, UI-006; TRD.md@0.2.1 API-002, §6.
 REQUIREMENTS: FR-002, FR-004, FR-032; API-002; UI-005, UI-006.
 PREREQUISITES: TASK-008 verified.
 OBJECTIVE: UI-005, UI-006 (profile, roles, PayPal, notification prefs, terms re-acceptance), API-002
@@ -521,7 +1046,7 @@ NEXT: TASK-010 and TASK-011.
 ```text
 TASK-010 — Tester identities
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-003; DATABASE_SCHEMA.md@0.2.0 DB-003; TRD.md@0.2.0 API-003; DESIGN_BRIEF.md@0.2.0 UI-006.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-003; DATABASE_SCHEMA.md@0.2.0 DB-003; TRD.md@0.2.1 API-003; DESIGN_BRIEF.md@0.2.0 UI-006.
 REQUIREMENTS: FR-003, FR-026; API-003; UI-006.
 PREREQUISITES: TASK-009 verified.
 OBJECTIVE: API-003 + identity section of UI-006
@@ -549,7 +1074,7 @@ NEXT: TASK-015 (after TASK-014).
 ```text
 TASK-011 — Campaign draft editor, icon upload, quote
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-005, FR-006, FR-033; APP_FLOW.md@0.3.0 FLOW-004 steps 1–2; DESIGN_BRIEF.md@0.2.0 UI-012, UI-013; DATABASE_SCHEMA.md@0.2.0 DB-004, DB-015, DB-018; TRD.md@0.2.0 API-004, §9.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-005, FR-006, FR-033; APP_FLOW.md@0.3.1 FLOW-004 steps 1–2; DESIGN_BRIEF.md@0.2.0 UI-012, UI-013; DATABASE_SCHEMA.md@0.2.0 DB-004, DB-015, DB-018; TRD.md@0.2.1 API-004, §9.
 REQUIREMENTS: FR-005, FR-006, FR-033; API-004; UI-012, UI-013.
 PREREQUISITES: TASK-009 verified.
 OBJECTIVE: API-004 (create/update/list/detail/icon), UI-012, UI-013, server-side quote, platform rules
@@ -582,7 +1107,7 @@ NEXT: TASK-012.
 ```text
 TASK-012 — Stripe Checkout, webhook, JOB-003
 ROLE: Act as a senior engineer specializing in Stripe payments.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-006, FR-007; TRD.md@0.2.0 §7.1, API-005, API-006, JOB-003; APP_FLOW.md@0.3.0 FLOW-004; DATABASE_SCHEMA.md@0.2.0 DB-005, DB-014, svc_mark_payment_paid.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-006, FR-007; TRD.md@0.2.1 §7.1, API-005, API-006, JOB-003; APP_FLOW.md@0.3.1 FLOW-004; DATABASE_SCHEMA.md@0.2.0 DB-005, DB-014, svc_mark_payment_paid.
 REQUIREMENTS: FR-006, FR-007; API-005, API-006; UI-014.
 PREREQUISITES: TASK-011 verified; STRIPE_SECRET_KEY (test), STRIPE_WEBHOOK_SECRET from `stripe listen`.
 OBJECTIVE: API-005, API-006, UI-014, Stripe adapter, payment expiry job body
@@ -617,7 +1142,7 @@ NEXT: TASK-013.
 ```text
 TASK-013 — Refund engine & developer cancellation
 ROLE: Act as a senior payments engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-013, FR-014, A-011; TRD.md@0.2.0 §7.1, JOB-006, API-024; APP_FLOW.md@0.3.0 FLOW-011, FLOW-013; DATABASE_SCHEMA.md@0.2.0 DB-006, svc_cancel_campaign.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-013, FR-014, A-011; TRD.md@0.2.1 §7.1, JOB-006, API-024; APP_FLOW.md@0.3.1 FLOW-011, FLOW-013; DATABASE_SCHEMA.md@0.2.0 DB-006, svc_cancel_campaign.
 REQUIREMENTS: FR-013, FR-014; API-024.
 PREREQUISITES: TASK-012 verified.
 OBJECTIVE: Execute refunds rows against Stripe with retries; developer cancel endpoint and UI actions
@@ -648,7 +1173,7 @@ NEXT: TASK-014.
 ```text
 TASK-014 — Admin campaign review
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-008; APP_FLOW.md@0.3.0 FLOW-005; DESIGN_BRIEF.md@0.2.0 UI-019; TRD.md@0.2.0 API-016.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-008; APP_FLOW.md@0.3.1 FLOW-005; DESIGN_BRIEF.md@0.2.0 UI-019; TRD.md@0.2.1 API-016.
 REQUIREMENTS: FR-008; API-016; UI-019.
 PREREQUISITES: TASK-013 verified.
 OBJECTIVE: API-016, UI-019; admin approval publishes campaign; rejection refunds
@@ -676,7 +1201,7 @@ NEXT: TASK-015.
 ```text
 TASK-015 — Listing, detail, enrol, withdraw
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-009, FR-015, FR-016, FR-019; APP_FLOW.md@0.3.0 FLOW-006; DESIGN_BRIEF.md@0.2.0 UI-007…UI-009; TRD.md@0.2.0 API-007, API-008.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-009, FR-015, FR-016, FR-019; APP_FLOW.md@0.3.1 FLOW-006; DESIGN_BRIEF.md@0.2.0 UI-007…UI-009; TRD.md@0.2.1 API-007, API-008.
 REQUIREMENTS: FR-009, FR-015, FR-016, FR-019; API-007, API-008; UI-007, UI-008, UI-009.
 PREREQUISITES: TASK-010 and TASK-014 verified.
 OBJECTIVE: API-007, API-008; UI-007, UI-008, UI-009
@@ -705,7 +1230,7 @@ NEXT: TASK-016.
 ```text
 TASK-016 — Roster, access grant, release, start testing
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-010, FR-011; APP_FLOW.md@0.3.0 FLOW-007; DESIGN_BRIEF.md@0.2.0 UI-015; TRD.md@0.2.0 API-009, API-010.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-010, FR-011; APP_FLOW.md@0.3.1 FLOW-007; DESIGN_BRIEF.md@0.2.0 UI-015; TRD.md@0.2.1 API-009, API-010.
 REQUIREMENTS: FR-010, FR-011; API-009, API-010; UI-015.
 PREREQUISITES: TASK-015 verified.
 OBJECTIVE: API-009, API-010; UI-015 roster/progress tabs
@@ -735,7 +1260,7 @@ NEXT: TASK-017.
 ```text
 TASK-017 — Check-in upload, proof viewing, flagging
 ROLE: Act as a senior full-stack engineer with secure file-upload experience.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-017, FR-018, FR-026; APP_FLOW.md@0.3.0 FLOW-008; DESIGN_BRIEF.md@0.2.0 UI-010; TRD.md@0.2.0 API-011, §9; DATABASE_SCHEMA.md@0.2.0 DB-008, DB-017.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-017, FR-018, FR-026; APP_FLOW.md@0.3.1 FLOW-008; DESIGN_BRIEF.md@0.2.0 UI-010; TRD.md@0.2.1 API-011, §9; DATABASE_SCHEMA.md@0.2.0 DB-008, DB-017.
 REQUIREMENTS: FR-017, FR-018, FR-019, FR-026; API-011; UI-010.
 PREREQUISITES: TASK-016 verified.
 OBJECTIVE: API-011; UI-010 opt-in panel and check-in forms; developer/admin proof viewing and flagging
@@ -766,7 +1291,7 @@ NEXT: TASK-018.
 ```text
 TASK-018 — Cron framework + JOB-001, JOB-002
 ROLE: Act as a senior backend engineer specializing in scheduled, idempotent jobs.
-SOURCE OF TRUTH: TRD.md@0.2.0 ADR-006, §8, API-021; DATABASE_SCHEMA.md@0.2.0 svc_job_* functions; APP_FLOW.md@0.3.0 FLOW-008, FLOW-009, FLOW-011, FLOW-013.
+SOURCE OF TRUTH: TRD.md@0.2.1 ADR-006, §8, API-021; DATABASE_SCHEMA.md@0.2.0 svc_job_* functions; APP_FLOW.md@0.3.1 FLOW-008, FLOW-009, FLOW-011, FLOW-013.
 REQUIREMENTS: FR-011…FR-014, FR-018; API-021; JOB-001, JOB-002, JOB-003, JOB-006.
 PREREQUISITES: TASK-017 and TASK-013 verified.
 OBJECTIVE: API-021 secured route, job runner with heartbeats, vercel.json crons, check-in reminders/missed sweep, campaign transitions & settlement
@@ -801,7 +1326,7 @@ NEXT: TASK-019.
 ```text
 TASK-019 — Verdicts, auto-pass, disputes
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-012, FR-021, FR-024; APP_FLOW.md@0.3.0 FLOW-009, FLOW-010; DESIGN_BRIEF.md@0.2.0 UI-016, UI-020; TRD.md@0.2.0 API-012, API-013.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-012, FR-021, FR-024; APP_FLOW.md@0.3.1 FLOW-009, FLOW-010; DESIGN_BRIEF.md@0.2.0 UI-016, UI-020; TRD.md@0.2.1 API-012, API-013.
 REQUIREMENTS: FR-012, FR-021, FR-024; API-012, API-013; UI-016, UI-020.
 PREREQUISITES: TASK-018 verified.
 OBJECTIVE: API-012, API-013; UI-016, UI-020; dispute UI on UI-010
@@ -828,7 +1353,7 @@ NEXT: TASK-020.
 ```text
 TASK-020 — Wallet & payout request
 ROLE: Act as a senior payments engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-020, FR-022, FR-004; APP_FLOW.md@0.3.0 FLOW-012; DESIGN_BRIEF.md@0.2.0 UI-011; TRD.md@0.2.0 API-014, API-015 (§5.4 example).
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-020, FR-022, FR-004; APP_FLOW.md@0.3.1 FLOW-012; DESIGN_BRIEF.md@0.2.0 UI-011; TRD.md@0.2.1 API-014, API-015 (§5.4 example).
 REQUIREMENTS: FR-020, FR-022; API-014, API-015; UI-011.
 PREREQUISITES: TASK-019 verified.
 OBJECTIVE: API-014, API-015; UI-011
@@ -856,7 +1381,7 @@ NEXT: TASK-021.
 ```text
 TASK-021 — PayPal payouts: admin approval, webhook, JOB-004
 ROLE: Act as a senior payments engineer with PayPal REST experience.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-023; TRD.md@0.2.0 ADR-004, §7.2, API-017, API-018, JOB-004; APP_FLOW.md@0.3.0 FLOW-012; DESIGN_BRIEF.md@0.2.0 UI-021.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-023; TRD.md@0.2.1 ADR-004, §7.2, API-017, API-018, JOB-004; APP_FLOW.md@0.3.1 FLOW-012; DESIGN_BRIEF.md@0.2.0 UI-021.
 REQUIREMENTS: FR-023, FR-026; API-017, API-018; UI-021; JOB-004.
 PREREQUISITES: TASK-020 verified; PAYPAL_CLIENT_ID/SECRET, PAYPAL_API_BASE (sandbox), PAYPAL_WEBHOOK_ID.
 OBJECTIVE: API-017, API-018; UI-021; PayPal adapter; reconciliation job
@@ -891,7 +1416,7 @@ NEXT: TASK-022.
 ```text
 TASK-022 — Admin users, settings, overview, audit log
 ROLE: Act as a senior full-stack engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-025, FR-028, FR-029, FR-030; APP_FLOW.md@0.3.0 FLOW-014; DESIGN_BRIEF.md@0.2.0 UI-018, UI-022…UI-024; TRD.md@0.2.0 API-019, API-020, API-025.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-025, FR-028, FR-029, FR-030; APP_FLOW.md@0.3.1 FLOW-014; DESIGN_BRIEF.md@0.2.0 UI-018, UI-022…UI-024; TRD.md@0.2.1 API-019, API-020, API-025.
 REQUIREMENTS: FR-025, FR-028, FR-029, FR-030; API-019, API-020, API-025.
 PREREQUISITES: TASK-021 verified.
 OBJECTIVE: API-019, API-020, API-025; UI-018, UI-022, UI-023, UI-024
@@ -921,7 +1446,7 @@ NEXT: TASK-023.
 ```text
 TASK-023 — Account deletion & retention
 ROLE: Act as a senior engineer focused on privacy engineering.
-SOURCE OF TRUTH: PRD.md@0.2.0 FR-031, NFR-003, NFR-012; APP_FLOW.md@0.3.0 FLOW-015; DATABASE_SCHEMA.md@0.2.0 §6.4; TRD.md@0.2.0 API-023, JOB-005.
+SOURCE OF TRUTH: PRD.md@0.3.0 FR-031, NFR-003, NFR-012; APP_FLOW.md@0.3.1 FLOW-015; DATABASE_SCHEMA.md@0.2.0 §6.4; TRD.md@0.2.1 API-023, JOB-005.
 REQUIREMENTS: FR-031; NFR-012; API-023; JOB-005.
 PREREQUISITES: TASK-022 verified.
 OBJECTIVE: API-023 with blockers and anonymisation; JOB-005 retention
@@ -949,7 +1474,7 @@ NEXT: TASK-024.
 ```text
 TASK-024 — Email notifications, reconciliation, alerts
 ROLE: Act as a senior backend engineer.
-SOURCE OF TRUTH: PRD.md@0.2.0 §8.1, FR-027, NFR-002, NFR-007; TRD.md@0.2.0 §7.3, §8 JOB-007/JOB-008, §11; DATABASE_SCHEMA.md@0.2.0 §11.
+SOURCE OF TRUTH: PRD.md@0.3.0 §8.1, FR-027, NFR-002, NFR-007; TRD.md@0.2.1 §7.3, §8 JOB-007/JOB-008, §11; DATABASE_SCHEMA.md@0.2.0 §11.
 REQUIREMENTS: FR-027; NFR-002, NFR-007, NFR-014; JOB-007, JOB-008.
 PREREQUISITES: TASK-023 verified.
 OBJECTIVE: Email templates for PRD §8.1, unsent-email retry, new-campaign fan-out, daily reconciliation, admin alerts
@@ -978,7 +1503,7 @@ NEXT: TASK-025.
 ```text
 TASK-025 — UI/UX completion
 ROLE: Act as a senior front-end engineer and accessibility specialist.
-SOURCE OF TRUTH: DESIGN_BRIEF.md@0.2.0 (all); APP_FLOW.md@0.3.0 (all flows); PRD.md@0.2.0 NFR-006, NFR-010.
+SOURCE OF TRUTH: DESIGN_BRIEF.md@0.2.0 (all); APP_FLOW.md@0.3.1 (all flows); PRD.md@0.3.0 NFR-006, NFR-010.
 REQUIREMENTS: UI-001…UI-026; NFR-006, NFR-010.
 PREREQUISITES: TASK-024 verified.
 OBJECTIVE: Landing content (UI-001), all screen states (DESIGN §11), responsive QA, accessibility pass, full-loop e2e
@@ -1007,7 +1532,7 @@ NEXT: TASK-026.
 ```text
 TASK-026 — Security, performance & quality verification
 ROLE: Act as a senior application security and performance engineer.
-SOURCE OF TRUTH: TRD.md@0.2.0 §10, §12, §14, §15; PRD.md@0.2.0 NFR-001, NFR-003, NFR-005, NFR-011.
+SOURCE OF TRUTH: TRD.md@0.2.1 §10, §12, §14, §15; PRD.md@0.3.0 NFR-001, NFR-003, NFR-005, NFR-011.
 REQUIREMENTS: NFR-001, NFR-003, NFR-005, NFR-011.
 PREREQUISITES: TASK-025 verified.
 OBJECTIVE: Execute security/perf gates; threat-model acceptance; CSP enforce
@@ -1035,7 +1560,7 @@ NEXT: TASK-027 (requires owner approval to deploy to staging).
 ```text
 TASK-027 — Staging deployment
 ROLE: Act as a senior DevOps engineer (Vercel + Supabase).
-SOURCE OF TRUTH: TRD.md@0.2.0 §4, §11, §14; DATABASE_SCHEMA.md@0.2.0 §8, §12; PRD.md@0.2.0 NFR-004, NFR-007, NFR-008.
+SOURCE OF TRUTH: TRD.md@0.2.1 §4, §11, §14; DATABASE_SCHEMA.md@0.2.0 §8, §12; PRD.md@0.3.0 NFR-004, NFR-007, NFR-008.
 REQUIREMENTS: NFR-004, NFR-007, NFR-008, NFR-014.
 PREREQUISITES: TASK-026 verified; owner approval recorded for staging changes.
 OBJECTIVE: Deploy to Vercel staging + Supabase staging with sandbox providers; smoke tests; backup/restore drill; monitoring & alerts
@@ -1068,7 +1593,7 @@ NEXT: TASK-028 only after owner approval and OD-001…OD-004 closed.
 ```text
 TASK-028 — Production release & handoff
 ROLE: Act as release manager; every irreversible step requires explicit owner confirmation.
-SOURCE OF TRUTH: all six documents @0.2.0 (or later approved versions); DECISIONS.md.
+SOURCE OF TRUTH: all six documents @0.2.0 (or later approved versions); PRD §18.
 REQUIREMENTS: all P0; OD-001…OD-004 closed.
 PREREQUISITES: TASK-027 verified; owner approval recorded for production.
 OBJECTIVE: Go live with live Stripe/PayPal after legal/tax/provider decisions; handoff
@@ -1104,9 +1629,9 @@ ROLE: Act as an independent release auditor.
 SOURCE OF TRUTH: docs/ec2build/* (all six documents at their current approved versions), docs/ec2build/PROGRESS.md.
 INSTRUCTIONS:
 1. Confirm TASK-001…TASK-028 each have evidence in PROGRESS.md (commit hash, commands, results). List any missing.
-2. For every FR-### and NFR-### in TRACEABILITY.md, confirm the mapped TEST-### exists in the repo and passed in the latest run; re-run:
+2. For every FR-### and NFR-### in IMPLEMENTATION_PLAN Appendix A, confirm the mapped TEST-### exists in the repo and passed in the latest run; re-run:
    pnpm lint && pnpm typecheck && pnpm test && supabase db reset && supabase test db && pnpm build && pnpm test:e2e
-3. Confirm DECISIONS.md shows OD-001…OD-004 closed and the production release was approved by the owner.
+3. Confirm PRD §18 shows OD-001…OD-004 closed and the production release was approved by the owner.
 4. Produce docs/ec2build/COMPLETION_REPORT.md: requirement coverage table, test results, open risks, deviations from docs.
 DO NOT: mark anything complete without evidence; change code (report only).
 DONE WHEN: COMPLETION_REPORT.md exists and states either "COMPLETE" with zero gaps or the exact list of gaps with the prompt to re-run for each.
@@ -1123,3 +1648,72 @@ DONE WHEN: COMPLETION_REPORT.md exists and states either "COMPLETE" with zero ga
 - [ ] TASK-008 · [ ] TASK-009 · [ ] TASK-010 · [ ] TASK-011 · [ ] TASK-012 · [ ] TASK-013 · [ ] TASK-014
 - [ ] TASK-015 · [ ] TASK-016 · [ ] TASK-017 · [ ] TASK-018 · [ ] TASK-019 · [ ] TASK-020 · [ ] TASK-021
 - [ ] TASK-022 · [ ] TASK-023 · [ ] TASK-024 · [ ] TASK-025 · [ ] TASK-026 · [ ] TASK-027 · [ ] TASK-028
+
+## Appendix A. Traceability
+Requirement → flow → screen → API → data → task → test. PRD/TRD/DESIGN_BRIEF/DATABASE_SCHEMA at 0.2.0; APP_FLOW at 0.3.0; IMPLEMENTATION_PLAN at 0.4.0.
+
+### 1. Functional requirements
+| FR | P | Flow | UI | API | DB | Task | Test |
+|---|---|---|---|---|---|---|---|
+| FR-001 Sign-up/in/out/reset | P0 | FLOW-001, FLOW-002 | UI-002, UI-003, UI-004 | API-001 | DB-001 | TASK-008 | TEST-001, TEST-002 |
+| FR-002 Role onboarding | P0 | FLOW-001 | UI-005 | API-002 | DB-001, DB-002 | TASK-009 | TEST-003 |
+| FR-003 Tester identities | P0 | FLOW-003 | UI-006 | API-003 | DB-003 | TASK-010 | TEST-004 |
+| FR-004 PayPal email + hold | P0 | FLOW-003, FLOW-012 | UI-006, UI-011 | API-002 | DB-001 | TASK-009, TASK-020 | TEST-021 |
+| FR-005 Campaign draft | P0 | FLOW-004 | UI-012, UI-013 | API-004 | DB-004, DB-018 | TASK-011 | TEST-006 |
+| FR-006 Server quote | P0 | FLOW-004 | UI-013 | API-004, API-005 | DB-004, DB-015 | TASK-011, TASK-012 | TEST-007 |
+| FR-007 Stripe payment | P0 | FLOW-004 | UI-013, UI-014 | API-005, API-006 | DB-005, DB-014 | TASK-012 | TEST-008, TEST-009 |
+| FR-008 Admin review | P0 | FLOW-005 | UI-019 | API-016 | DB-004, DB-006, DB-013 | TASK-014 | TEST-010 |
+| FR-009 Recruiting & listing | P0 | FLOW-006 | UI-007, UI-008 | API-007 | DB-004, DB-007, v_campaign_listings | TASK-005, TASK-015 | TEST-011, TEST-012 |
+| FR-010 Roster & access | P0 | FLOW-007 | UI-015 | API-009 | DB-007, DB-008, DB-013 | TASK-016 | TEST-014 |
+| FR-011 Start testing | P0 | FLOW-007 | UI-015 | API-010 | DB-004, DB-007, DB-008 | TASK-006, TASK-016 | TEST-015 |
+| FR-012 Verdicts & auto-pass | P0 | FLOW-009 | UI-016 | API-012, API-021 | DB-007, DB-010 | TASK-018, TASK-019 | TEST-019 |
+| FR-013 Settlement & refunds | P0 | FLOW-011, FLOW-005, FLOW-013 | UI-015 | API-021, API-006 | DB-004, DB-005, DB-006 | TASK-013, TASK-018 | TEST-025 |
+| FR-014 Cancellation | P0 | FLOW-013 | UI-012, UI-015, UI-019 | API-024, API-016, API-021 | DB-004, DB-006 | TASK-013, TASK-014, TASK-018 | TEST-026 |
+| FR-015 Browse | P0 | FLOW-006 | UI-007, UI-008 | API-007 | v_campaign_listings | TASK-015 | TEST-011 |
+| FR-016 Join | P0 | FLOW-006 | UI-008, UI-009 | API-008 | DB-003, DB-007 | TASK-006, TASK-015 | TEST-013 |
+| FR-017 Opt-in & activation | P0 | FLOW-008 | UI-010 | API-011 | DB-008, DB-017 | TASK-017 | TEST-012, TEST-016 |
+| FR-018 Check-ins | P0 | FLOW-008 | UI-009, UI-010, UI-015 | API-011, API-021 | DB-008, DB-017 | TASK-006, TASK-017, TASK-018 | TEST-015, TEST-016, TEST-018 |
+| FR-019 Withdraw | P0 | FLOW-006, FLOW-008 | UI-010 | API-008 | DB-007 | TASK-015, TASK-017 | TEST-037 |
+| FR-020 Wallet | P0 | FLOW-012 | UI-011 | API-014 | DB-010, wallet_balances | TASK-020 | TEST-038 |
+| FR-021 Reward crediting | P0 | FLOW-009, FLOW-010 | UI-011, UI-016 | API-012, API-013, API-021 | DB-010 | TASK-006, TASK-019 | TEST-022 |
+| FR-022 Payout request | P0 | FLOW-012 | UI-011 | API-015 | DB-010, DB-011 | TASK-020 | TEST-020 |
+| FR-023 PayPal execution | P0 | FLOW-012 | UI-021 | API-017, API-018 | DB-010, DB-011, DB-014 | TASK-021 | TEST-024 |
+| FR-024 Disputes | P0 | FLOW-010 | UI-010, UI-020 | API-013 | DB-009, DB-007 | TASK-019 | TEST-023 |
+| FR-025 Moderation | P0 | FLOW-014 | UI-022 | API-019 | DB-001, DB-002, DB-013 | TASK-006, TASK-022 | TEST-028 |
+| FR-026 Fraud controls | P0 | FLOW-003, FLOW-008, FLOW-012 | UI-021 | API-003, API-011, API-017 | DB-001, DB-003, DB-008, DB-016 | TASK-010, TASK-017, TASK-021 | TEST-004, TEST-017 |
+| FR-027 Notifications | P0 | all | UI-017 | API-022 | DB-012 | TASK-007, TASK-024 | TEST-030 |
+| FR-028 Admin console | P0 | FLOW-005, FLOW-010, FLOW-012, FLOW-014 | UI-018 | API-025 | multiple | TASK-022 | TEST-041 |
+| FR-029 Settings | P0 | FLOW-004 (consumer) | UI-023 | API-020 | DB-015 | TASK-022 | TEST-031 |
+| FR-030 Audit log | P0 | admin flows | UI-024 | API-025 | DB-013 | TASK-004, TASK-007, TASK-022 | TEST-027 |
+| FR-031 Account deletion | P1 | FLOW-015 | UI-006 | API-023 | DB-001, DB-003, DB-017 | TASK-023 | TEST-029 |
+| FR-032 Policies & disclosures | P0 | FLOW-001 | UI-002, UI-005, UI-026 | API-001, API-002 | DB-001 | TASK-003, TASK-008, TASK-009 | TEST-039 |
+| FR-033 Platform rules | P0 | FLOW-004 | UI-013 | API-004 | DB-015 | TASK-011 | TEST-040 |
+
+### 2. Non-functional requirements
+| NFR | Task | Verification |
+|---|---|---|
+| NFR-001 Security | TASK-000 (secrets handling), TASK-005, TASK-007, TASK-026 | TEST-005, TEST-034 |
+| NFR-002 Payment integrity | TASK-006, TASK-012, TASK-021, TASK-024 | TEST-009, TEST-020, TEST-022, TEST-024, TEST-036 |
+| NFR-003 Privacy | TASK-005, TASK-017, TASK-023 | TEST-005, TEST-029; legal review OD-003 |
+| NFR-004 Availability | TASK-027 | uptime monitor evidence |
+| NFR-005 Performance | TASK-026 | TEST-033 |
+| NFR-006 Accessibility | TASK-003, TASK-025 | TEST-032 |
+| NFR-007 Observability | TASK-007, TASK-024, TASK-027 | TEST-030; alert drill (TASK-027) |
+| NFR-008 Backup/recovery | TASK-027 | restore drill record |
+| NFR-009 Localisation | TASK-003 | money/time unit tests |
+| NFR-010 Compatibility | TASK-002, TASK-025 | Playwright chromium/webkit/Pixel 7 |
+| NFR-011 Rate limiting | TASK-007, TASK-008, TASK-017, TASK-020 | TEST-002, TEST-016, TEST-020 |
+| NFR-012 Retention | TASK-023 | TEST-035 |
+| NFR-013 Scale | TASK-026 | TEST-033 |
+| NFR-014 Email deliverability | TASK-008, TASK-027 | DNS check record |
+
+### 3. Coverage of IDs (reverse checks)
+| Artifact | All referenced? | Notes |
+|---|---|---|
+| UI-001…UI-026 | yes | UI-001 → TASK-003/025; UI-025/026 → TASK-003 |
+| API-001…API-025 | yes | API-025 added in TRD 0.1.0 for FR-028/FR-030 |
+| DB-001…DB-018 | yes | DB-016 rate_limits via TASK-007 |
+| FLOW-001…FLOW-015 | yes | |
+| JOB-001…JOB-008 | yes | JOB-001/002 TASK-018; 003 TASK-012; 004 TASK-021; 005 TASK-023; 006 TASK-013; 007/008 TASK-024 |
+| TASK-000…TASK-028 | yes | DAG acyclic (IMPLEMENTATION_PLAN §3); TASK-000 = accounts setup (IMPLEMENTATION_PLAN §2A, doctor) |
+| TEST-001…TEST-042 | yes | each mapped to ≥1 task |

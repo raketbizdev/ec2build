@@ -6,8 +6,8 @@
 | Document | `DESIGN_BRIEF.md` (04) |
 | Version | 0.2.0 · draft |
 | Date | 2026-10-11 |
-| Upstream | PRD 0.2.0, APP_FLOW 0.3.0 |
-| Downstream | IMPLEMENTATION_PLAN 0.4.0 |
+| Upstream | PRD 0.3.0, APP_FLOW 0.3.1 |
+| Downstream | IMPLEMENTATION_PLAN 0.5.0 |
 | Prototype | **None built.** This brief contains specifications and wireframe descriptions only. |
 
 ## 1. Intended experience

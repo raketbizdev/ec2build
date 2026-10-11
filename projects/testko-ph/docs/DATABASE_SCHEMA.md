@@ -6,8 +6,8 @@
 | Document | `DATABASE_SCHEMA.md` (05) |
 | Version | 0.2.0 · draft |
 | Date | 2026-10-11 |
-| Upstream | PRD 0.2.0, TRD 0.2.0, APP_FLOW 0.3.0 |
-| Downstream | IMPLEMENTATION_PLAN 0.4.0 |
+| Upstream | PRD 0.3.0, TRD 0.2.1, APP_FLOW 0.3.1 |
+| Downstream | IMPLEMENTATION_PLAN 0.5.0 |
 | Engine | PostgreSQL (Supabase Cloud, Singapore) — exact major version recorded at TASK-004 |
 
 ## 1. Storage choice

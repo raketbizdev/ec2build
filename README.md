@@ -1,6 +1,6 @@
 # EC2Build
 
-An installable agent skill for Claude Code and OpenAI Codex. It turns an app idea into six consistent, versioned build specs (PRD, TRD, App Flow with horizontal swimlanes, Design Brief, Database Schema, and an Implementation Plan written as prompts you run one after another), ready for a coding agent.
+An installable agent skill for Claude Code and OpenAI Codex. It turns an app idea into **exactly six** consistent, versioned build specs (PRD, TRD, App Flow with horizontal swimlanes, Design Brief, Database Schema, and an Implementation Plan written as prompts you run one after another), ready for a coding agent.
 
 **Free and open source (MIT).** EC2Build costs nothing to install or use. The third-party services your app uses (Supabase, Google Play, Apple, Stripe, hosting, email…) run on **your own accounts**. Some have free tiers and some charge fees. EC2Build helps you create and connect them, as automatically as each provider allows (see "Accounts & shared responsibility" below).
 
@@ -42,7 +42,7 @@ In Codex, type `$ec2build …` instead of `/ec2build …`.
 **Output location:** `./ec2build/<slug>/` in the folder where you run it, or `./projects/<slug>/` inside an EC2Build workspace like this repo. Use `--out <dir>` to choose.
 
 ## Accounts & shared responsibility
-Every project gets `docs/SETUP.md`, `docs/setup.json` and `docs/SHARED_RESPONSIBILITY.md`:
+The Implementation Plan includes an accounts setup section (§2A, feeds PROMPT 00) and a shared responsibility matrix (§2B):
 - **AUTO:** the agent runs it after you log in through the provider's own CLI (e.g., create the Supabase project, push the database, register webhooks, upload an Android build to a Play testing track).
 - **ASSISTED:** the agent gives exact links and clicks, waits, then verifies (e.g., create the app in Play Console, create a service-account key).
 - **OWNER-ONLY:** you do it because it is legally yours (accept terms, pay registration fees, verify identity, store policy answers).
@@ -63,7 +63,7 @@ skills/ec2build/            the installable skill (everything the agent needs)
   SKILL.md                  entry point: arguments, output location, tools, help
   references/               EC2BUILD_AGENT.md, WORKFLOW.md, TEMPLATES.md, SETUP_AND_RESPONSIBILITY.md
   scripts/swimlanes.py      renders horizontal swimlanes from docs/diagrams/flows.json
-  scripts/validate.py       checks package structure, manifest, traceability, swimlanes, setup files
+  scripts/validate.py       checks the six documents, swimlane images and setup block
   scripts/doctor.py         shows what is missing for local/staging/production (never prints secrets)
 .claude-plugin/             plugin.json + marketplace.json (Claude Code plugin install)
 bin/ec2build.js              npx CLI: install / update / uninstall / status / doctor / validate / swimlanes

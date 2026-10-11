@@ -18,8 +18,6 @@ ERD Mermaid; tables with exact columns/types/nullability/defaults/PK/FK; constra
 ## IMPLEMENTATION_PLAN.md
 Written as a sequence of self-contained copy/paste prompts (one per TASK, run in order until complete, then a completion audit). Milestone and dependency DAG; ordered phases 0..N; one fully specified coding-agent instruction per task; referenced FR/TRD/flow/design/schema IDs; repository paths; commands and prerequisites; code & docs outputs; tests and security verification; pass/fail criteria; checkpoints, rollback and release gates; progress checklist; no invented completion statuses.
 
-## SETUP.md / setup.json / SHARED_RESPONSIBILITY.md
-Per third-party service: purpose, cost note, stages (local/staging/production), steps labelled AUTO / ASSISTED / OWNER-ONLY with exact URLs and commands, env variable names (never values), verification command, troubleshooting. setup.json mirrors it (format ec2build-setup/1). SHARED_RESPONSIBILITY.md: owner / EC2Build / coding agent / provider matrix tailored to the project (see references/SETUP_AND_RESPONSIBILITY.md §6).
-
-## Supporting files
-TRACEABILITY.md requirements-to-design-data-code-test mapping; DECISIONS.md architecture and product decisions; CHANGELOG.md edits. manifest.json metadata with each document's state/version and dependency relationships.
+## Supporting content (inside the six documents — no extra files)
+- **PRD** ends with: Brief, discovery & context · Confirmed decisions & assumptions (C-###, A-###) · Open decisions (OD-###, blocks, owner) + override log · Change history (package version table).
+- **IMPLEMENTATION_PLAN** includes: §2A Accounts setup: per third-party service purpose, cost note, stages (local/staging/production), steps labelled AUTO / ASSISTED / OWNER-ONLY with exact URLs and commands, env variable names (never values), verification; steps are rendered between `<!-- setup:begin -->`/`<!-- setup:end -->` from a ```json block (format ec2build-setup/1). §2B Shared responsibility matrix (owner / EC2Build / coding agent / providers, see references/SETUP_AND_RESPONSIBILITY.md §6). Appendix A Traceability matrix (FR/NFR → flow → UI → API → DB → task → test).

@@ -4,9 +4,9 @@
 | Field | Value |
 |---|---|
 | Document | `APP_FLOW.md` (03) |
-| Version | 0.3.0 · draft |
+| Version | 0.3.1 · draft |
 | Date | 2026-10-11 |
-| Upstream | PRD 0.2.0, TRD 0.2.0 |
+| Upstream | PRD 0.3.0, TRD 0.2.1 |
 | Downstream | DESIGN_BRIEF, DATABASE_SCHEMA, IMPLEMENTATION_PLAN |
 
 ## 1. Conventions
@@ -27,7 +27,7 @@
   | **Service unavailable** (DB/provider 5xx) | API 502/503 `PROVIDER_UNAVAILABLE`/`INTERNAL`; UI shows retry with backoff; no partial money state (single DB transaction) |
   | **Duplicate submission** | Submit buttons disabled while pending; server guards (status checks, unique indexes) make repeats no-ops or 409 `INVALID_STATE` which UI treats as "already done" and refreshes |
   | **Rate limited** | 429 + `Retry-After`; UI shows wait time |
-- Offline-first behaviour is out of scope (PROJECT_CONTEXT §6); reconnect = user retries.
+- Offline-first behaviour is out of scope (PRD §16 §6); reconnect = user retries.
 
 ## 2. Flow index
 | Flow | Name | Actors | FR | UI | API |

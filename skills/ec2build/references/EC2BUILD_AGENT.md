@@ -14,7 +14,7 @@ Canonical command:
 - `--brief` is optional syntactically. If absent and purpose is unknown, ask what the product does and whom it serves; if known from current chat, reuse it and confirm inferred essentials.
 - Never silently choose an app type or fabricate a specific business model, audience, payment provider or legal jurisdiction.
 - If a required argument is missing, ask one short question for the missing parameter(s); combine missing independent parameters into a concise question if needed.
-- Ask follow-ups for **material blocking unknowns** such as core users, workflows, platform, jurisdiction for regulated data, multiplayer vs single-player for games, or offline needs. Batch at most five priority discovery questions per round. Make reasonable nonblocking decisions, label them `ASSUMPTION`, explain implications, and record them in `ASSUMPTIONS.md`.
+- Ask follow-ups for **material blocking unknowns** such as core users, workflows, platform, jurisdiction for regulated data, multiplayer vs single-player for games, or offline needs. Batch at most five priority discovery questions per round. Make reasonable nonblocking decisions, label them `ASSUMPTION`, explain implications, and record them in the PRD § Confirmed decisions & assumptions.
 - Do not ask the user to select a stack unless it materially affects feasibility or they express preferences. Recommend a stack with alternatives and tradeoffs.
 
 Supported commands:
@@ -26,7 +26,7 @@ Supported commands:
 - `/ec2build sync --name "Example"`: evaluate all cross-document impacts and repair inconsistencies
 - `/ec2build validate --name "Example"`: run Gauntlet and report remaining issues
 - `/ec2build build --name "Example" --phase 1`: issue the implementation instructions for the requested phase; **do not claim that code was executed unless the environment actually ran it**
-- `/ec2build export --name "Example"`: export six docs, supporting artifacts, manifest and changelog in available formats.
+- `/ec2build export --name "Example"`: export the six documents (and the App Flow diagrams) in available formats.
 - `/ec2build setup --name "Example" [--stage local|staging|production]`: run the accounts setup assistant (see `references/SETUP_AND_RESPONSIBILITY.md`): automate AUTO steps, guide ASSISTED steps, list OWNER-ONLY steps, then run the doctor.
 - `/ec2build doctor --name "Example" --stage local`: report what is missing for a stage (CLIs, env var names, pending owner steps) without revealing secrets.
 
@@ -43,7 +43,7 @@ Supported commands:
 10. The execution plan must consume the actual generated requirements and identifiers, not generic coding instructions.
 
 ## Phase 0: Discovery
-Parse input, create PROJECT_CONTEXT with: problem statement; target audience and personas; primary jobs to be done; operating regions; roles; core workflows; differentiator; monetization if relevant; platforms; integrations; data sensitivity; constraints; MVP boundaries; success metrics; accessibility; localization; legal considerations; offline/real-time requirements; technical preferences; expected load; deployment destination; maintenance ownership.
+Parse input and capture the context (it goes into PRD §"Brief, discovery & context"): problem statement; target audience and personas; primary jobs to be done; operating regions; roles; core workflows; differentiator; monetization if relevant; platforms; integrations; data sensitivity; constraints; MVP boundaries; success metrics; accessibility; localization; legal considerations; offline/real-time requirements; technical preferences; expected load; deployment destination; maintenance ownership.
 
 In `games` mode also discover genre, engine/platform, core loop, controls, save/progression, content pipeline, single-/multiplayer, latency, anti-cheat, analytics and distribution. For every app type ask **which platforms** are wanted: web, native mobile (Android/iOS) or both; never silently reduce a mobile request to a web app/PWA. For `mobile`: iOS/Android scope, app store needs (Google Play / App Store accounts), permissions, offline and notifications. For `web`: browser support, SSR/SEO/PWA constraints. Apply the default stack in `references/SETUP_AND_RESPONSIBILITY.md` §1 (Supabase database by default; Expo for native) unless the owner prefers otherwise, and list every third-party account the product will need. For `others`: characterize CLI, service, desktop, library, embedded or internal tool.
 
@@ -171,46 +171,46 @@ DONE WHEN: <testable assertions, evidence, gates>.
 NEXT: TASK-... only after verified completion.
 ```
 
-The sequence always starts with **PROMPT 00: accounts & environment setup** driven by `docs/SETUP.md` / `docs/setup.json` (AUTO steps run, ASSISTED steps guided, OWNER-ONLY steps listed, ends with `doctor.py --stage local` green); deployment prompts re-run the doctor for `staging`/`production` first.
+The sequence always starts with **PROMPT 00: accounts & environment setup** driven by the plan's own §2A "Accounts setup" (steps + setup JSON block) (AUTO steps run, ASSISTED steps guided, OWNER-ONLY steps listed, ends with `doctor.py --stage local` green); deployment prompts re-run the doctor for `staging`/`production` first.
 
 Also deliver implementation sequence with DAG/dependency table, owner (human or coding agent), rough effort estimate identified as estimate, milestone and risk. Include a copyable master prompt to execute one TASK at a time and stop on failed gates. Add project-specific release and support handoff.
 
 ## Package layout
-Use this structure when file-writing is supported:
+**Output is exactly six documents** (plus the App Flow's swimlane images). Do not create other files.
 ```
 <OUTPUT_ROOT>/<project-slug>/          (OUTPUT_ROOT: see SKILL.md "Where output goes")
-  README.md
-  manifest.json
   docs/
-    PROJECT_CONTEXT.md
-    ASSUMPTIONS.md
     PRD.md
     TRD.md
     APP_FLOW.md
-    diagrams/flows.json, diagrams/FLOW-###.svg   (generated by <SKILL_DIR>/scripts/swimlanes.py)
+    diagrams/flows.json, diagrams/FLOW-###.svg   (App Flow images, generated by <SKILL_DIR>/scripts/swimlanes.py)
     DESIGN_BRIEF.md
     DATABASE_SCHEMA.md
     IMPLEMENTATION_PLAN.md
-    TRACEABILITY.md
-    DECISIONS.md          (ADRs live in TRD; product + open decisions here)
-    CHANGELOG.md
-    VALIDATION_REPORT.md
-    SETUP.md              (accounts setup assistant output, per service)
-    setup.json            (machine-readable setup, read by scripts/doctor.py)
-    SHARED_RESPONSIBILITY.md (who does what: owner, EC2Build, coding agent, providers)
 ```
+Where supporting information lives:
+| Information | Location |
+|---|---|
+| Brief, discovery answers, context checklist | PRD § Brief, discovery & context |
+| Confirmed decisions (C-###) and assumptions (A-###) | PRD § Confirmed decisions & assumptions |
+| Open decisions (OD-###) and override log | PRD § Open decisions (ADRs stay in TRD §1) |
+| Package change history | PRD § Change history (one row per package version) |
+| Accounts setup (AUTO/ASSISTED/OWNER-ONLY steps + setup JSON block) | IMPLEMENTATION_PLAN §2A |
+| Shared responsibility matrix | IMPLEMENTATION_PLAN §2B |
+| Traceability matrix (FR → flow → UI → API → DB → task → test) | IMPLEMENTATION_PLAN Appendix A |
+| Validation (Gauntlet) results | Reported in the chat response; not saved as a file |
 
-`manifest.json` tracks `project_id`, app_type, name, status, overall_revision, per-doc `{version,status,updated_at,dependencies}`, assumptions, decision IDs, validation status. Versions use `major.minor.patch`. `TRACEABILITY.md` is a matrix of requirement → flow → screen → component/API → entity → task → tests. Every task must cite precise source version. A document can be `draft`, `review_needed`, `approved`, or `stale`. Approval is user-provided, never assumed.
+Each document's **document control** table holds its version (`major.minor.patch`), status (`draft`, `review_needed`, `approved`, `stale`; approval is user-provided, never assumed), date and upstream versions. The package version is the latest row of the PRD change history. Every task must cite precise source versions. To find a project by `--name`, match the folder slug or the project name in the PRD title / document control ("Renamed from" row for old names).
 
 ## Incremental editing and dependency engine
 On `/ec2build edit`:
-1. Load manifest plus all six current docs, traceability and existing change history. If files are not accessible, ask the user to provide them or work from available content without claiming persisted synchronization.
+1. Load all six current docs (including the PRD change history and the plan's traceability appendix). If files are not accessible, ask the user to provide them or work from available content without claiming persisted synchronization.
 2. Parse requested edit; target exact sections/IDs. Make minimal changes, preserve unchanged approved sections.
 3. Build an impact set using requirement ID references and semantic dependency relationships. Example: new signup MFA in PRD may touch TRD auth architecture/API, FLOW onboarding/recovery, DESIGN MFA screens, SCHEMA MFA state and audit records, PLAN implementation tasks/tests.
 4. Construct a human-readable proposed change summary: changed requirement, affected docs, migration/security/deployment risks, backward compatibility and unresolved choices. For irreversible or high-impact changes, seek approval before applying.
-5. Update affected portions, not entire documents; bump modified document versions and overall revision. Mark downstream tasks or docs stale until reconciled.
-6. Regenerate traceability links and re-run validation on affected workflows plus global invariants. Repair consistency issues iteratively. Do not silently discard prior user decisions.
-7. Record a CHANGELOG entry with requested change, rationale, affected files/IDs, version before/after, remaining issues. Report exact changes and final validation state.
+5. Update affected portions, not entire documents; bump modified document versions and add a PRD change-history row. Mark downstream tasks or docs stale until reconciled.
+6. Update the traceability appendix (IMPLEMENTATION_PLAN Appendix A) and re-run validation on affected workflows plus global invariants. Repair consistency issues iteratively. Do not silently discard prior user decisions.
+7. Add a PRD change-history row (package version, date, change, documents touched) and record overrides in PRD § Open decisions → Override log. Report exact changes and final validation state.
 
 For updates initiated directly in Markdown outside the agent, require a `/ec2build sync` run or repository automation to detect and reconcile changes. Never promise continuous automatic watching absent configured infrastructure.
 
@@ -226,7 +226,7 @@ Run at most three focused repair passes, then report blockers instead of endless
 - C8: CI/security/test/release gates are objectively measurable, not vague assertions.
 - C9: Each major decision is confirmed or clearly marked assumed/pending.
 - C10: Documentation changes have impacted version and traceability updates.
-- C11: Every third-party service named in the TRD has a SETUP.md section and setup.json entry (cost note, automation level per step, env var names, verification) and appears in SHARED_RESPONSIBILITY.md; no step asks the owner to paste secrets into chat.
+- C11: Every third-party service named in the TRD has an entry in IMPLEMENTATION_PLAN §2A (steps and setup JSON) (cost note, automation level per step, env var names, verification) and appears in the §2B shared responsibility matrix; no step asks the owner to paste secrets into chat.
 
 Return PASS / WARN / FAIL per criterion with affected IDs and precise corrective action. Label **Ready for implementation** only if there are no blocking FAILs, and disclose WARNs. Never equate documentation validation with tested running software.
 

@@ -1,5 +1,11 @@
 # EC2Build agent — CHANGELOG
 
+## 1.4.0 — 2026-10-11
+- Simplified output: a project is **only the six documents** (PRD, TRD, APP_FLOW + its swimlane images, DESIGN_BRIEF, DATABASE_SCHEMA, IMPLEMENTATION_PLAN). No manifest, README, context, assumptions, decisions, changelog, traceability, validation report or setup files.
+- Supporting content moved inside: PRD ends with brief/context, assumptions, open decisions, change history; IMPLEMENTATION_PLAN has §2A accounts setup (with the setup JSON block), §2B shared responsibility, Appendix A traceability. Validation results are reported in chat.
+- `doctor.py` reads/renders the setup from IMPLEMENTATION_PLAN §2A; `validate.py` checks the six documents, swimlanes and setup block.
+- Example project TestKo PH migrated (package 0.6.0).
+
 ## 1.3.0 — 2026-10-11
 - Install with `npx ec2build install` (npm package `ec2build`, no dependencies, Windows/macOS/Linux). Commands: install, update, uninstall, status, doctor, validate, swimlanes, help.
 - Removed the shell/PowerShell/Python installer scripts. Other routes: Claude Code plugin, `npx github:raketbizdev/ec2build`, manual copy.
