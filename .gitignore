@@ -9,3 +9,5 @@
 **/.DS_Store
 **/.claude/settings.local.json
 **/.codex/
+# project output never belongs in the agent repository
+/projects/

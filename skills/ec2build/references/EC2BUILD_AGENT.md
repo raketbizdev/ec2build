@@ -90,9 +90,9 @@ For each `FLOW-###` provide:
 - User onboarding/login/logout/password reset, key CRUD and transaction flows, administration, billing (if present), deletion and recovery as applicable.
 
 ### How to produce the swimlanes (agent tool)
-1. Write the diagram data to `<OUTPUT_ROOT>/<slug>/docs/diagrams/flows.json` (format `ec2build-swimlanes/1`, documented at the top of `<SKILL_DIR>/scripts/swimlanes.py`). Each flow lists `lanes` (top-to-bottom rows), `nodes` `[id, lane, column, kind, label]` with kind `start|task|decision|error|end` (one node per lane+column, listed in reading order), and `edges` `[src, dst, label]`. An edge to an earlier column is drawn as a dashed retry arrow. Split a flow into parts (`"part": "a"`, `"b"`) when it would exceed ~15 columns.
+1. Write the diagram data to `<PROJECT_ROOT>/docs/diagrams/flows.json` (format `ec2build-swimlanes/1`, documented at the top of `<SKILL_DIR>/scripts/swimlanes.py`). Each flow lists `lanes` (top-to-bottom rows), `nodes` `[id, lane, column, kind, label]` with kind `start|task|decision|error|end` (one node per lane+column, listed in reading order), and `edges` `[src, dst, label]`. An edge to an earlier column is drawn as a dashed retry arrow. Split a flow into parts (`"part": "a"`, `"b"`) when it would exceed ~15 columns.
 2. In `APP_FLOW.md`, put an empty marker pair `<!-- swimlane:FLOW-### -->` / `<!-- /swimlane:FLOW-### -->` where each diagram belongs.
-3. Run `python3 <SKILL_DIR>/scripts/swimlanes.py <OUTPUT_ROOT>/<slug>`. It validates the data, writes `docs/diagrams/FLOW-###[-part].svg`, and fills each marker block with the image plus a generated Mermaid `flowchart LR` text version (one `subgraph` per lane).
+3. Run `python3 <SKILL_DIR>/scripts/swimlanes.py <PROJECT_ROOT>`. It validates the data, writes `docs/diagrams/FLOW-###[-part].svg`, and fills each marker block with the image plus a generated Mermaid `flowchart LR` text version (one `subgraph` per lane).
 4. Never hand-edit the SVGs or marker blocks; change `flows.json` and re-run. If the tool is unavailable, write the Mermaid `flowchart LR` version by hand and report that images were not generated.
 5. When possible, render the SVGs (e.g., `rsvg-convert`) and visually check them before reporting.
 
@@ -132,7 +132,7 @@ Generate:
 - Map schema elements to the FR, flow and API that require them.
 
 ## Phase 6: Implementation Plan (`IMPLEMENTATION_PLAN.md`)
-This document is **an execution playbook for a coding agent**. It must contain sequential, copy/paste-ready AI instructions from repository creation to deployed, verified release. It must not consist of a superficial task checklist.
+This document is **an execution playbook for a coding agent**. The app is built **inside the project folder** (PROJECT_ROOT, the folder that contains `docs/`): prompts never create a separate repository or copy the documents, never modify `docs/`, and keep build logs, preflight results and runbooks in `ops/`. It must contain sequential, copy/paste-ready AI instructions from repository creation to deployed, verified release. It must not consist of a superficial task checklist.
 
 Always include:
 1. **Execution contract**: coding-agent role, absolute rules, source-of-truth docs, setup, environment, assumptions, allowed tools, expected outputs, test discipline, do-not-skip criteria.
@@ -178,7 +178,7 @@ Also deliver implementation sequence with DAG/dependency table, owner (human or 
 ## Package layout
 **Output is exactly six documents** (plus the App Flow's swimlane images) **and one generated HTML page** that presents all six. Do not create other files.
 ```
-<OUTPUT_ROOT>/<project-slug>/          (OUTPUT_ROOT: see SKILL.md "Where output goes")
+<PROJECT_ROOT>/   = ./<project-slug>/ (see SKILL.md "Where output goes"); the app is later built here, next to docs/
   docs/
     PRD.md
     TRD.md

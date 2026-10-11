@@ -52,7 +52,7 @@ Logins use the provider's own CLI/browser flow (`supabase login`, `stripe login`
 `stages` = where the service is needed. `env[stage]` lists variables needed for that stage (cumulative with earlier stages). `cli` = executables that must be on PATH.
 
 ### Doctor
-`python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --stage local|staging|production [--app <app-repo-dir>]` reads the setup JSON from IMPLEMENTATION_PLAN.md and reports per service: CLIs found/missing, env vars present/missing (from the environment and `<app>/.env.local`), and the owner steps still to do. Exit code 1 when anything required for that stage is missing.
+`python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --stage local|staging|production` reads the setup JSON from IMPLEMENTATION_PLAN.md and reports per service: CLIs found/missing, env vars present/missing (from the environment and `<app>/.env.local`), and the owner steps still to do. Exit code 1 when anything required for that stage is missing.
 
 ## 5. Provider playbook (verify details at setup time: providers change)
 | Service | Owner (one-time) | Agent can automate after login/token |

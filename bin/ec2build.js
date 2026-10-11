@@ -20,10 +20,10 @@ Commands
   update             Same as install (replaces the installed copy with this version)
   uninstall          Remove installed copies
   status             Show where EC2Build is installed and which version
-  doctor <project>   Check accounts/tools/env for a stage   (--stage local|staging|production, --app <dir>)
-  validate <project> Check a generated project package
-  swimlanes <project>  Re-render App Flow swimlane diagrams
-  html <project>     Build the one-page HTML of all six documents (docs/<slug>.html)
+  doctor [project]   Check accounts/tools/env for a stage   (--stage local|staging|production)
+  validate [project] Check a project's six documents
+  swimlanes [project] Re-render App Flow swimlane diagrams
+  html [project]     Build the one-page HTML of all six documents (docs/<slug>.html)
   help               Show this help
 
 Install options
@@ -107,10 +107,10 @@ function findPython() {
   return null;
 }
 
-function runTool(tool, args) {
+function runTool(tool, args) {  // [project] defaults to the current folder
   const py = findPython();
   if (!py) fail('Python 3 is required for this command: https://www.python.org/downloads/');
-  if (!args.length) fail(`usage: npx ec2build ${tool} <project-dir> [options]`);
+  if (!args.length || args[0].startsWith('-')) args = ['.', ...args];   // default: current folder is the project
   const r = spawnSync(py[0], [...py[1], path.join(SRC, 'scripts', `${tool}.py`), ...args], { stdio: 'inherit' });
   process.exit(r.status === null ? 1 : r.status);
 }

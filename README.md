@@ -39,7 +39,19 @@ Open Claude Code or Codex in any folder:
 ```
 In Codex, type `$ec2build …` instead of `/ec2build …`.
 
-**Output location:** `./ec2build/<slug>/` in the folder where you run it, or `./projects/<slug>/` inside an EC2Build workspace like this repo. Use `--out <dir>` to choose.
+**Output location:** a folder named after your project, in the folder where you run the command. That folder later **becomes your app**: the implementation prompts build the code right there, next to the documents.
+```
+~/Desktop$  /ec2build --app web --name "TestKo PH" --brief "..."
+
+testko-ph/                 ← project root (becomes the app repository)
+├── docs/                  ← written by EC2Build
+│   ├── PRD.md  TRD.md  APP_FLOW.md  DESIGN_BRIEF.md  DATABASE_SCHEMA.md  IMPLEMENTATION_PLAN.md
+│   ├── diagrams/          (App Flow swimlane images)
+│   └── testko-ph.html     (all six documents on one page)
+├── ops/                   ← added by the build prompts (progress log, runbooks)
+└── src/, supabase/, …     ← the app, added by the build prompts
+```
+If you run it inside an existing project folder, it writes to `./docs/` there. `--out <dir>` picks another location.
 
 ## Accounts & shared responsibility
 The Implementation Plan includes an accounts setup section (§2A, feeds PROMPT 00) and a shared responsibility matrix (§2B):
@@ -70,7 +82,6 @@ skills/ec2build/            the installable skill (everything the agent needs)
 bin/ec2build.js              npx CLI: install / update / uninstall / status / doctor / validate / swimlanes
 package.json                npm package (name: ec2build)
 .claude/skills, .agents/skills   workspace pointers to skills/ec2build (for use inside this repo)
-projects/                   example output (TestKo PH)
 ```
 
 ## Developing EC2Build

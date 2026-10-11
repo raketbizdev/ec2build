@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """EC2Build setup doctor: is everything ready for a stage? Never prints secret values.
 
-Usage:  python3 <SKILL_DIR>/scripts/doctor.py <project-dir> [--stage local|staging|production] [--app <app-repo-dir>]
+Usage:  python3 <SKILL_DIR>/scripts/doctor.py <project-dir> [--stage local|staging|production]
         python3 <SKILL_DIR>/scripts/doctor.py <project-dir> --render     # regenerate the setup steps in IMPLEMENTATION_PLAN §2A
 Reads the ```json block with "format": "ec2build-setup/1" in <project-dir>/docs/IMPLEMENTATION_PLAN.md
 (see references/SETUP_AND_RESPONSIBILITY.md).
-Env vars are looked up in the process environment and in <app>/<env_file> (default .env.local).
+Env vars are looked up in the process environment and in <project-dir>/<env_file> (default .env.local);
+the app is built inside the project folder, next to docs/. (--app <dir> overrides where the env file is read.)
 Exit code 1 when a CLI or env var required for the stage is missing.
 """
 import json, os, pathlib, re, shutil, sys
@@ -43,7 +44,7 @@ def render(project, spec):
     o = ["<!-- setup:begin -->", "_Generated from the JSON block below by the EC2Build doctor; edit the JSON, then re-render._", "",
          "**Levels:** AUTO = the agent runs it after you log in · ASSISTED = you follow exact steps, the agent verifies · "
          "OWNER-ONLY = legally yours (terms, payments, identity).", "",
-         f"**Secrets:** put values only in `{spec.get('env_file', '.env.local')}` of the app repo (or your host's env settings). "
+         f"**Secrets:** put values only in `{spec.get('env_file', '.env.local')}` in the project folder (or your host's env settings). "
          "Never paste them into chat. Check progress with `/ec2build doctor --stage <stage>`.", "",
          "| Service | Needed for | Cost note |", "|---|---|---|"]
     for svc in spec["services"]:
@@ -77,7 +78,7 @@ def main(argv):
         sys.exit(__doc__)
     project = pathlib.Path(args[0])
     stage = args[args.index("--stage") + 1] if "--stage" in args else "local"
-    app = pathlib.Path(args[args.index("--app") + 1]) if "--app" in args else None
+    app = pathlib.Path(args[args.index("--app") + 1]) if "--app" in args else project
     if stage not in STAGES:
         sys.exit(f"--stage must be one of {STAGES}")
     spec = load_spec(project)
@@ -89,7 +90,7 @@ def main(argv):
     env_names = set(os.environ) | read_env_file(app / spec.get("env_file", ".env.local") if app else None)
 
     problems = 0
-    print(f"EC2Build doctor: {project.resolve().name}, stage '{stage}'" + (f", app {app}" if app else " (no --app: checking process env only)"))
+    print(f"EC2Build doctor: {project.resolve().name}, stage '{stage}'" + f", env file {app / spec.get('env_file', '.env.local')}")
     for svc in spec["services"]:
         if not set(svc.get("stages", [])) & set(upto):
             continue

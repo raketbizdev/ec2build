@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """EC2Build structural check: the six documents, swimlane images, setup block and the one-page HTML.
-Usage: python3 <SKILL_DIR>/scripts/validate.py <project-dir>   (or a folder of projects)
+Usage: python3 <SKILL_DIR>/scripts/validate.py [project-dir]   (default: current folder; or a folder containing projects)
 Semantic cross-document validation (Gauntlet) remains the agent's responsibility."""
 from pathlib import Path
 import json, re, sys
@@ -9,7 +9,7 @@ for _s in (sys.stdout, sys.stderr):
   except Exception: pass
 
 DOCS = ['PRD.md', 'TRD.md', 'APP_FLOW.md', 'DESIGN_BRIEF.md', 'DATABASE_SCHEMA.md', 'IMPLEMENTATION_PLAN.md']
-base = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('projects')
+base = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('.')
 projects = [base] if (base / 'docs').exists() else [p for p in base.iterdir() if (p / 'docs').is_dir()] if base.exists() else []
 if not projects:
   print('No generated project found'); sys.exit(1)

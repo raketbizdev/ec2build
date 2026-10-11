@@ -9,7 +9,7 @@
       "name": "ec2build",
       "source": "./",
       "description": "Six-document agentic SDLC blueprint generator with horizontal swimlanes and prompt-sequence implementation plans.",
-      "version": "1.5.0"
+      "version": "1.6.0"
     }
   ]
 }

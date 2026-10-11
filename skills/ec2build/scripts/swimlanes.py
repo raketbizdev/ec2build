@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """EC2Build agent tool: render horizontal swimlanes (rows = users/systems, flow left -> right) for a project's APP_FLOW.md.
 
-Usage:  python3 <SKILL_DIR>/scripts/swimlanes.py <project-dir>      (e.g. ec2build/my-app or projects/my-app)
+Usage:  python3 <SKILL_DIR>/scripts/swimlanes.py <project-dir>      (the project folder that contains docs/, e.g. ./testko-ph)
 
 Input (project output, written by the agent):  <project-dir>/docs/diagrams/flows.json
   {"format": "ec2build-swimlanes/1",
